@@ -48,19 +48,6 @@ if [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
     show_help
 fi
 
-# Banner
-echo -e "${CYAN}"
-echo "╔═══════════════════════════════════════════════╗"
-echo "║   GitHub Workflows Synchronization Tool      ║"
-echo "║     Sync workflows to local repositories     ║"
-echo "╚═══════════════════════════════════════════════╝"
-echo -e "${NC}"
-
-# Mostrar repositorio en uso
-if [ "$WORKFLOWS_REPO" != "$DEFAULT_WORKFLOWS_REPO" ]; then
-    print_info "Usando repositorio: ${YELLOW}$WORKFLOWS_REPO${NC}"
-fi
-
 # Función para mostrar mensajes
 print_success() {
     echo -e "${GREEN}✓${NC} $1"
@@ -77,6 +64,19 @@ print_info() {
 print_warning() {
     echo -e "${YELLOW}⚠${NC} $1"
 }
+
+# Banner
+echo -e "${CYAN}"
+echo "╔═══════════════════════════════════════════════╗"
+echo "║   GitHub Workflows Synchronization Tool      ║"
+echo "║     Sync workflows to local repositories     ║"
+echo "╚═══════════════════════════════════════════════╝"
+echo -e "${NC}"
+
+# Mostrar repositorio en uso
+if [ "$WORKFLOWS_REPO" != "$DEFAULT_WORKFLOWS_REPO" ]; then
+    print_info "Usando repositorio: ${YELLOW}$WORKFLOWS_REPO${NC}"
+fi
 
 # Función para obtener la descripción de un workflow
 get_workflow_description() {
@@ -121,8 +121,17 @@ get_workflows_source() {
     fi
 
     # Crear directorio temporal único basado en hash del repo URL
-    local repo_hash=$(echo -n "$WORKFLOWS_REPO" | md5sum 2>/dev/null || echo -n "$WORKFLOWS_REPO" | md5)
-    repo_hash=$(echo "$repo_hash" | cut -d' ' -f1)
+    local repo_hash
+    if command -v md5sum >/dev/null 2>&1; then
+        # Linux: md5sum outputs "hash  -"
+        repo_hash=$(printf '%s' "$WORKFLOWS_REPO" | md5sum | awk '{print $1}')
+    elif command -v md5 >/dev/null 2>&1; then
+        # macOS: md5 outputs "MD5 (...) = hash"
+        repo_hash=$(printf '%s' "$WORKFLOWS_REPO" | md5 | awk '{print $NF}')
+    else
+        # Fallback si no hay md5/md5sum disponible
+        repo_hash="default"
+    fi
     TEMP_REPO_DIR="/tmp/claude-workflows-sync-${repo_hash:0:8}"
 
     # Si no, clonar o actualizar el repo temporal

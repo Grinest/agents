@@ -114,7 +114,7 @@ paths-ignore:
 
 Current model: `claude-sonnet-4-20250514`
 
-To change the model, edit line 140 in `code-review-backend-py.yml`:
+To change the model, search for `"model": "claude-sonnet-4-20250514"` in `code-review-backend-py.yml`:
 
 ```yaml
 "model": "claude-sonnet-4-20250514",  # Cost-effective, high quality
@@ -132,7 +132,7 @@ Edit `agents/reviewer-backend-py.md` to adjust:
 
 ### Set Review Strictness
 
-In `code-review-backend-py.yml` line 166-172, you can modify approval logic:
+In `code-review-backend-py.yml`, search for the approval logic section (look for `if echo "$REVIEW_CONTENT" | grep -q "APPROVE"`) to modify:
 
 ```yaml
 # Current: Requires explicit APPROVE keyword
