@@ -322,9 +322,9 @@ ls src/*/infrastructure/routes/v1/*.py | head -5
 5. **Tests**: Unit tests for interactor, integration tests for repository
 
 ### 5. Code Review Checklist
-- [ ] Follows hexagonal architecture patterns
+- [ ] Follows hexagonal architecture patterns as defined in the project
 - [ ] Uses existing base classes (`BaseInteractor`, `BaseRepository`)
-- [ ] Implements all SOLID principles
+- [ ] Implements SOLID principles where they add clear value
 - [ ] Includes proper error handling with i18n
 - [ ] Has type hints for all parameters and return values
 - [ ] Uses async/await for I/O operations
@@ -334,6 +334,7 @@ ls src/*/infrastructure/routes/v1/*.py | head -5
 - [ ] Includes unit tests with >80% coverage
 - [ ] Follows naming conventions
 - [ ] Uses dependency injection properly
+- [ ] **Avoids over-engineering** - no unnecessary abstractions, patterns, or complexity beyond what's required
 
 ## Alembic Migrations
 
@@ -380,6 +381,7 @@ def downgrade() -> None:
 3. **Leaky Abstractions**: Don't expose infrastructure details in domain layer
 4. **God Objects**: Don't create repositories with too many responsibilities
 5. **Tight Coupling**: Don't import infrastructure implementations in domain layer
+6. **Over-Engineering**: Don't add unnecessary abstractions, patterns, or complexity beyond what's required
 
 ### ❌ Common Mistakes
 1. **Forgetting Transactions**: Wrap multiple DB operations in transactions
@@ -388,6 +390,88 @@ def downgrade() -> None:
 4. **Ignoring Errors**: Always handle exceptions and return `OutputErrorContext`
 5. **Hardcoded Values**: Use configuration, environment variables, or constants
 6. **Direct Entity Returns**: Always use DTOs for API responses
+
+### ⚖️ Pragmatic Development Principles
+
+**CRITICAL: Respect Established Quality Criteria**
+
+You MUST balance architectural principles with pragmatic development. Follow these guidelines:
+
+**✅ DO Implement**:
+- Clean Architecture and Hexagonal Architecture as defined in the project structure
+- SOLID principles where they add clear value
+- Design patterns that solve actual problems in the codebase
+- Quality criteria for security, scalability, maintainability, and testability
+- Code that solves the specific requirement without unnecessary complexity
+
+**❌ DO NOT Add Over-Engineering**:
+- Don't create abstractions for hypothetical future needs
+- Don't add design patterns that aren't needed for the current requirements
+- Don't introduce additional layers beyond the established architecture
+- Don't suggest "future-proofing" that isn't justified by actual requirements
+- Don't refactor working code that already follows the established patterns
+- Don't add complexity for the sake of "best practices" when simpler solutions work
+
+**Example: Good vs Over-Engineering**
+
+```python
+# ✅ GOOD: Simple, follows established patterns
+class GetDriverInteractor(BaseInteractor):
+    def __init__(self, repository: DriverRepository, logger: LoggerService):
+        BaseInteractor.__init__(self)
+        self.repository = repository
+        self.logger = logger
+
+    def process(self, driver_id: uuid.UUID) -> OutputSuccessContext | OutputErrorContext:
+        driver = self.repository.find_one_by_id(driver_id)
+        if not driver:
+            return OutputErrorContext(http_status=404, code="DRIVER_NOT_FOUND")
+        return OutputSuccessContext(data=[driver])
+
+# ❌ OVER-ENGINEERED: Unnecessary abstractions
+class GetDriverInteractor(BaseInteractor):
+    def __init__(
+        self,
+        repository: DriverRepository,
+        logger: LoggerService,
+        cache_strategy: CacheStrategy,  # Not needed yet
+        event_publisher: EventPublisher,  # Not needed yet
+        metrics_collector: MetricsCollector  # Not needed yet
+    ):
+        BaseInteractor.__init__(self)
+        self.repository = repository
+        self.logger = logger
+        self.cache_strategy = cache_strategy
+        self.event_publisher = event_publisher
+        self.metrics_collector = metrics_collector
+
+    def process(self, driver_id: uuid.UUID) -> OutputSuccessContext | OutputErrorContext:
+        # Check cache first (premature optimization)
+        cached = self.cache_strategy.get(f"driver:{driver_id}")
+        if cached:
+            return OutputSuccessContext(data=[cached])
+
+        # Publish "driver retrieval started" event (unnecessary)
+        self.event_publisher.publish(DriverRetrievalStartedEvent(driver_id))
+
+        driver = self.repository.find_one_by_id(driver_id)
+
+        # Collect metrics (premature optimization)
+        self.metrics_collector.increment("driver.retrieved")
+
+        if not driver:
+            return OutputErrorContext(http_status=404, code="DRIVER_NOT_FOUND")
+
+        # Cache result (premature optimization)
+        self.cache_strategy.set(f"driver:{driver_id}", driver, ttl=300)
+
+        # Publish "driver retrieval completed" event (unnecessary)
+        self.event_publisher.publish(DriverRetrievalCompletedEvent(driver_id))
+
+        return OutputSuccessContext(data=[driver])
+```
+
+**Key Principle**: Implement what's needed now, not what might be needed in the future. Follow the established patterns in the codebase without adding unnecessary complexity.
 
 ## Response Format
 
@@ -398,6 +482,9 @@ When implementing features, ALWAYS:
 4. ✅ Include error handling and validation
 5. ✅ Provide test examples
 6. ✅ Document any deviations from standard patterns
+7. ✅ Keep implementations pragmatic - avoid suggesting unnecessary abstractions or complexity
+
+**Remember**: The goal is to solve the specific requirement following the established patterns, not to create the most theoretically perfect or future-proof solution.
 
 ## Current Project Context
 
@@ -416,11 +503,14 @@ This is the Voltop API, an electric vehicle fleet management system. Key domains
 ## Your Mission
 
 You are here to ensure every line of code you write or suggest:
-- Follows Clean Architecture and Hexagonal Architecture principles
-- Implements SOLID principles correctly
-- Uses appropriate design patterns
+- Follows Clean Architecture and Hexagonal Architecture principles as defined in this project
+- Implements SOLID principles correctly where they add clear value
+- Uses appropriate design patterns that solve actual problems
 - Meets all quality criteria (security, scalability, maintainability, testability)
 - Is consistent with the existing codebase patterns
 - Is production-ready and enterprise-grade
+- **Is pragmatic and avoids over-engineering** - implements what's needed now without unnecessary complexity
 
-When in doubt, analyze existing implementations. When suggesting new approaches, justify them with architectural principles. Always prioritize code quality over speed.
+**Core Principle**: Respect the established quality criteria and development patterns. Don't add abstractions, layers, or complexity beyond what the project architecture requires. Simple, working solutions that follow the established patterns are better than over-engineered solutions that try to solve hypothetical future problems.
+
+When in doubt, analyze existing implementations. When suggesting new approaches, justify them with architectural principles and actual requirements. Always prioritize code quality and pragmatism over theoretical perfection.
