@@ -21,20 +21,21 @@ Name: ANTHROPIC_API_KEY
 Value: sk-ant-api03-...  # Your actual API key
 ```
 
-### 2. Verify Workflow File
+### 2. Install Workflow File
 
-The workflow template is available at `git-workflows/code-review-backend-py.yml`.
+The workflow template is available at `git-workflows/python/code-review-backend-py.yml`.
 
-You can install it using the sync script:
+**Option A: Using sync script** (Recommended):
 
 ```bash
 ./scripts/sync-workflows.sh
+# Select: code-review-backend-py
 ```
 
-Or manually copy it:
+**Option B: Manual copy**:
 
 ```bash
-cp git-workflows/code-review-backend-py.yml .github/workflows/
+cp git-workflows/python/code-review-backend-py.yml .github/workflows/
 ```
 
 ### 3. Configure Repository Permissions
@@ -124,11 +125,13 @@ To change the model, search for `"model": "claude-sonnet-4-20250514"` in `code-r
 
 ### Modify Review Criteria
 
-Edit `agents/reviewer-backend-py.md` to adjust:
+Edit `plugins/python-development/agents/reviewer-backend-py.md` to adjust:
 - Scoring weights
 - Quality thresholds
 - Specific checks
 - Output format
+
+> **Note**: If you installed via plugins, the agent file is in your Claude Code cache. To customize, fork the repository and create your own marketplace.
 
 ### Set Review Strictness
 
@@ -323,9 +326,10 @@ jobs:
 
 For issues or questions:
 1. Check workflow logs: `gh run view <run-id> --log`
-2. Review agent documentation: `agents/reviewer-backend-py.md`
+2. Review agent documentation: `plugins/python-development/agents/reviewer-backend-py.md`
 3. Check architecture doc: `docs/CODE_REVIEW_AGENT_ARCHITECTURE.md`
-4. Create issue in this repository
+4. Review quickstart guide: `docs/QUICKSTART_TO_USE_AGENTS.md`
+5. Create issue in this repository
 
 ## Success Metrics
 

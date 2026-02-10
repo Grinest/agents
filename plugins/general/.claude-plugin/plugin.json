@@ -1,0 +1,25 @@
+{
+  "name": "general",
+  "description": "Language-agnostic agents for software architecture and system design",
+  "version": "1.0.0",
+  "author": {
+    "name": "Grinest",
+    "url": "https://github.com/Grinest"
+  },
+  "homepage": "https://github.com/Grinest/agents",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Grinest/agents.git"
+  },
+  "agents": [
+    "agents/architect.md"
+  ],
+  "tags": [
+    "architecture",
+    "design",
+    "planning",
+    "system-design",
+    "agnostic"
+  ],
+  "license": "MIT"
+}

@@ -4,14 +4,14 @@ on:
   push:
     branches: [ main, develop ]
     paths:
-      - 'agents/**'
+      - 'plugins/**'
       - 'scripts/validate-agents.sh'
       - 'git-workflows/**'
       - '.github/workflows/validate-agents.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
-      - 'agents/**'
+      - 'plugins/**'
       - 'scripts/validate-agents.sh'
       - 'git-workflows/**'
 
@@ -36,7 +36,7 @@ jobs:
         with:
           name: validation-results
           path: |
-            agents/
+            plugins/
             scripts/validate-agents.sh
           retention-days: 5
 
@@ -58,7 +58,7 @@ jobs:
 
       - name: Lint agent markdown files
         run: |
-          markdownlint agents/*.md --config .markdownlint.json || true
+          markdownlint 'plugins/**/agents/*.md' 'plugins/**/skills/*.md' --config .markdownlint.json || true
         continue-on-error: true
 
   check-yaml:
@@ -84,11 +84,15 @@ jobs:
           import os
           import sys
 
-          agents_dir = 'agents'
+          plugins_dir = 'plugins'
           failed = False
 
           # Walk through all subdirectories
-          for root, dirs, files in os.walk(agents_dir):
+          for root, dirs, files in os.walk(plugins_dir):
+              # Only validate files in agents/ or skills/ subdirectories
+              if '/agents' not in root and '/skills' not in root:
+                  continue
+
               for filename in files:
                   if not filename.endswith('.md'):
                       continue
@@ -98,7 +102,7 @@ jobs:
                       continue
 
                   filepath = os.path.join(root, filename)
-                  rel_path = os.path.relpath(filepath, agents_dir)
+                  rel_path = os.path.relpath(filepath, plugins_dir)
 
                   with open(filepath, 'r') as f:
                       content = f.read()

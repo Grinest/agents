@@ -8,7 +8,13 @@ Este repositorio proporciona una colección de agentes de Claude especializados 
 
 ## Agentes Disponibles
 
-### 1. Architect Agent (`architect.md`)
+Los agentes están organizados en plugins por dominio tecnológico. Cada plugin contiene agentes especializados y skills ejecutables.
+
+### General Plugin
+
+Agentes agnósticos de lenguaje que funcionan en cualquier proyecto.
+
+#### 1. Architect Agent (`[general/agents] architect`)
 **Especialista en Arquitectura de Software**
 
 Agente enfocado en análisis, evaluación y recomendación de soluciones arquitectónicas sin escribir código de implementación.
@@ -29,7 +35,11 @@ Agente enfocado en análisis, evaluación y recomendación de soluciones arquite
 - Planificación de proyectos
 - Documentación de arquitectura
 
-### 2. Backend Python Agent (`backend-py.md`)
+### Python Development Plugin
+
+Agentes y skills especializados para desarrollo Python backend.
+
+#### 2. Backend Python Agent (`[python-development/agents] backend-py`)
 **Desarrollo Backend Python con Clean Architecture**
 
 Agente especializado en desarrollo backend Python usando Clean Architecture y Hexagonal Architecture (Ports & Adapters).
@@ -58,7 +68,7 @@ Agente especializado en desarrollo backend Python usando Clean Architecture y He
 - Migraciones de base de datos
 - Refactorización hacia arquitectura limpia
 
-### 3. QA Backend Python Agent (`qa-backend-py.md`)
+#### 3. QA Backend Python Agent (`[python-development/agents] qa-backend-py`)
 **Testing y QA para Backend Python**
 
 Agente especializado en testing, QA y chaos engineering para sistemas backend Python.
@@ -81,7 +91,7 @@ Agente especializado en testing, QA y chaos engineering para sistemas backend Py
 - Validar seguridad del código
 - Testing de performance
 
-### 4. Reviewer Backend Python Agent (`reviewer-backend-py.md`)
+#### 4. Reviewer Backend Python Agent (`[python-development/agents] reviewer-backend-py`)
 **Code Review Automatizado para Backend Python**
 
 Agente especializado en revisión de código que combina las perspectivas del Architect, Backend-Py y QA para proporcionar reviews completas de PRs.
@@ -101,6 +111,54 @@ Agente especializado en revisión de código que combina las perspectivas del Ar
 - Asegurar estándares de arquitectura
 - Verificar cobertura de testing
 - Auditorías de seguridad
+
+#### 5. Reviewer Library Python Agent (`[python-development/agents] reviewer-library-py`)
+**Code Review para Librerías Python**
+
+Agente especializado en revisión de código para librerías Python, enfocado en API design, documentación y distribución de paquetes.
+
+**Cuándo usar:**
+- Revisión de PRs en proyectos de librería Python
+- Validación de diseño de API pública
+- Verificación de documentación y ejemplos
+- Auditoría de estructura de paquete
+
+#### 6. Backend Python Celery Skill (`[python-development/skills] backend-py-celery`)
+**Desarrollo de APIs y Tareas Celery**
+
+Skill ejecutable para desarrollo de rutas FastAPI y tareas programadas Celery con Clean Architecture.
+
+**Capacidades:**
+- Creación de endpoints FastAPI con dependency injection
+- Implementación de tareas Celery programadas
+- Generación de boilerplate para Clean Architecture
+- Integración con repositorios centralizados
+
+**Cuándo usar:**
+- Crear nuevas rutas de API REST
+- Implementar tareas programadas (cron jobs)
+- Generar estructura de Clean Architecture
+
+### Flutter Development Plugin
+
+Agentes especializados para desarrollo Flutter/Dart.
+
+#### 7. Reviewer Flutter App Agent (`[flutter-development/agents] reviewer-flutter-app`)
+**Code Review para Aplicaciones Flutter**
+
+Agente especializado en revisión de código Flutter, enfocado en widgets, state management y performance móvil.
+
+**Capacidades:**
+- Análisis de arquitectura de widgets
+- Validación de state management patterns
+- Optimización de performance
+- Best practices de Flutter/Dart
+
+**Cuándo usar:**
+- Code reviews automatizados de Flutter PRs
+- Validación de arquitectura de widgets
+- Verificación de performance
+- Auditoría de best practices móviles
 
 ## GitHub Workflows
 
@@ -163,7 +221,7 @@ cp git-workflows/*.yml .github/workflows/
 
 ```bash
 # Clonar en directorio home
-git clone https://github.com/juanpaconpa/claude-agents.git ~/.claude-agents
+git clone https://github.com/Grinest/agents.git ~/.claude-agents
 
 # Crear alias
 echo 'alias sync-workflows="~/.claude-agents/scripts/sync-workflows.sh"' >> ~/.bashrc
@@ -198,109 +256,143 @@ Después de instalar un workflow:
 
 Ver [documentación completa de workflows](./git-workflows/README.md) para más detalles.
 
-## Instalación de Agentes
+## Instalación de Agentes y Skills
 
-### Método 1: Script de Sincronización (Recomendado)
+### Método Recomendado: Plugin Marketplace (2026)
 
-El método más fácil y rápido para instalar agentes:
+El método moderno usa el sistema de plugins de Claude Code:
 
-```bash
-# Clonar el repositorio
-git clone https://github.com/juanpaconpa/claude-agents.git
-cd claude-agents
-
-# Ejecutar el script de sincronización
-./scripts/sync-agents.sh
-```
-
-### Método 2: Instalación Remota
-
-Instalar sin clonar el repositorio:
+#### 1. Agregar el Marketplace
 
 ```bash
-# Instalar con repositorio por defecto
-curl -sSL https://raw.githubusercontent.com/juanpaconpa/claude-agents/main/scripts/sync-agents.sh | bash
-
-# Instalar con repositorio personalizado
-curl -sSL https://raw.githubusercontent.com/juanpaconpa/claude-agents/main/scripts/sync-agents.sh | bash -s -- https://github.com/tu-empresa/agents.git
+/plugin marketplace add Grinest/agents
 ```
 
-### Método 3: Instalación Global
+#### 2. Instalar Plugins
 
-Para usar en cualquier proyecto:
+Instala los plugins que necesites:
 
 ```bash
-# Clonar en directorio home
-git clone https://github.com/juanpaconpa/claude-agents.git ~/.claude-agents
+# Agentes generales (arquitectura)
+/plugin install general@agents
 
-# Crear alias
-echo 'alias sync-agents="~/.claude-agents/scripts/sync-agents.sh"' >> ~/.bashrc
-source ~/.bashrc
+# Desarrollo Python (backend, QA, review, skill Celery)
+/plugin install python-development@agents
 
-# Usar desde cualquier proyecto
-cd /tu/proyecto
-sync-agents
+# Desarrollo Flutter (review)
+/plugin install flutter-development@agents
+
+# O instalar todo
+/plugin install general@agents python-development@agents flutter-development@agents
 ```
 
-### Método 4: Manual
+#### 3. Verificar Instalación
 
-Copiar manualmente los agentes:
+```bash
+# Listar plugins instalados
+/plugin list
+
+# Ver detalles de un plugin
+/plugin show python-development@agents
+```
+
+### Configuración para Equipos
+
+Para que todo el equipo tenga los mismos plugins automáticamente, agrega a `.claude/settings.json`:
+
+```json
+{
+  "plugin_marketplaces": ["Grinest/agents"],
+  "plugins": [
+    "general@agents",
+    "python-development@agents",
+    "flutter-development@agents"
+  ]
+}
+```
+
+Los miembros del equipo solo necesitan clonar el proyecto - los plugins se instalan automáticamente.
+
+### Explorar Plugins Disponibles
+
+```bash
+# Ver todos los plugins del marketplace
+/plugin marketplace browse claude-agents
+
+# Buscar por tecnología
+/plugin search python
+/plugin search flutter
+```
+
+### Actualizar Plugins
+
+```bash
+# Actualizar un plugin específico
+/plugin update python-development@agents
+
+# Actualizar todos los plugins del marketplace
+/plugin update --marketplace claude-agents
+```
+
+### Método Alternativo: Instalación Manual
+
+Si prefieres no usar el sistema de plugins, puedes copiar manualmente:
 
 ```bash
 # Crear directorio de agentes
 mkdir -p .claude/agents
 
 # Copiar agentes deseados
-cp claude-agents/agents/architect.md .claude/agents/
-cp claude-agents/agents/backend-py.md .claude/agents/
-cp claude-agents/agents/qa-backend-py.md .claude/agents/
+cp claude-agents/plugins/general/agents/architect.md .claude/agents/
+cp claude-agents/plugins/python-development/agents/backend-py.md .claude/agents/
+cp claude-agents/plugins/python-development/skills/backend-py-celery.md .claude/agents/
 ```
 
-## Uso del Script de Sincronización
+> ⚠️ **Nota**: La instalación manual no tiene versionamiento ni auto-updates. Se recomienda usar el método de plugins.
 
-### Sintaxis
+## Uso de Agentes y Skills
+
+Una vez instalados los plugins, los agentes y skills están disponibles automáticamente en Claude Code.
+
+### Invocar Agentes
+
+Los agentes se activan automáticamente según el contexto de tu solicitud:
 
 ```bash
-./scripts/sync-agents.sh [REPOSITORY_URL]
+# El agente architect se activa automáticamente
+"Analiza la arquitectura de este proyecto y recomienda cómo agregar autenticación"
+
+# El agente backend-py se activa para desarrollo
+"Implementa un interactor para crear usuarios siguiendo Clean Architecture"
+
+# El agente qa-backend-py se activa para testing
+"Escribe tests unitarios para este interactor con >90% de cobertura"
 ```
 
-### Opciones
+### Invocar Skills
 
-- `REPOSITORY_URL`: URL del repositorio de agentes (opcional)
-- `-h, --help`: Muestra la ayuda
+Los skills se invocan explícitamente con el prefijo `/`:
 
-### Ejemplos
-
-**Uso básico:**
 ```bash
-./scripts/sync-agents.sh
+# Skill de desarrollo FastAPI + Celery
+/backend-py-celery Create a new API endpoint for user authentication with JWT
+
+# Ver ayuda de un skill
+/backend-py-celery --help
 ```
 
-**Con repositorio personalizado:**
+### Listar Agentes y Skills Instalados
+
 ```bash
-# Como parámetro
-./scripts/sync-agents.sh https://github.com/empresa/company-agents.git
+# Ver todos los plugins instalados
+/plugin list
 
-# Como variable de entorno
-AGENTS_REPO=https://github.com/empresa/agents.git ./scripts/sync-agents.sh
+# Ver agentes disponibles
+/agents list
 
-# Exportar variable (permanente)
-export AGENTS_REPO="https://github.com/empresa/agents.git"
-./scripts/sync-agents.sh
+# Ver skills disponibles
+/skills list
 ```
-
-**Selección de agentes:**
-- **Opción 1**: Instalar todos los agentes
-- **Opción 2**: Selección personalizada (números individuales: `1 3` o rangos: `1-3`)
-- **Opción 3**: Salir
-
-### Flujo de Trabajo
-
-1. El script muestra todos los agentes disponibles con sus descripciones
-2. Seleccionas qué agentes instalar
-3. Confirmas la instalación (en modo personalizado)
-4. Los agentes se copian a `.claude/agents/`
-5. Se muestra un resumen de la sincronización
 
 ## Estructura del Proyecto
 
@@ -309,79 +401,133 @@ claude-agents/
 ├── .gitignore
 ├── .github/
 │   └── workflows/
-│       └── validate-agents.yml    # CI para validar agentes
-├── .idea/                          # IntelliJ IDEA config
-├── README.md                       # Este archivo
-├── agents/                         # Agentes de Claude
-│   ├── architect.md               # Agente de arquitectura
-│   ├── backend-py.md              # Agente de backend Python
-│   ├── qa-backend-py.md           # Agente de QA/testing
-│   └── reviewer-backend-py.md     # Agente de code review
-├── docs/                           # Documentación
-│   ├── CI_CD_GUIDE_TO_CODE_REVIEW_AGENT.md  # Guía de CI/CD para code review
-│   ├── CODE_REVIEW_AGENT_ARCHITECTURE.md    # Arquitectura del code reviewer
+│       └── validate-agents.yml           # CI para validar agentes
+├── .idea/                                # IntelliJ IDEA config
+├── README.md                             # Este archivo
+├── plugins/                              # Sistema de plugins
+│   ├── README.md                         # Documentación del sistema de plugins
+│   ├── general/                          # Agentes agnósticos de lenguaje
+│   │   ├── README.md
+│   │   └── agents/
+│   │       └── architect.md             # Agente de arquitectura
+│   ├── python-development/              # Ecosistema Python
+│   │   ├── README.md
+│   │   ├── agents/
+│   │   │   ├── backend-py.md           # Agente de backend Python
+│   │   │   ├── qa-backend-py.md        # Agente de QA/testing
+│   │   │   ├── reviewer-backend-py.md  # Agente de code review
+│   │   │   └── reviewer-library-py.md  # Agente de review de librerías
+│   │   └── skills/
+│   │       └── backend-py-celery.md    # Skill FastAPI + Celery
+│   └── flutter-development/             # Ecosistema Flutter
+│       ├── README.md
+│       └── agents/
+│           └── reviewer-flutter-app.md  # Agente de review Flutter
+├── docs/                                 # Documentación
+│   ├── CI_CD_GUIDE_TO_CODE_REVIEW_AGENT.md  # Guía de CI/CD
+│   ├── CODE_REVIEW_AGENT_ARCHITECTURE.md    # Arquitectura del reviewer
 │   ├── QUICKSTART_TO_USE_AGENTS.md          # Inicio rápido
 │   └── TESTING_STRATEGY.md                  # Estrategia de testing
-├── git-workflows/                  # Workflows reutilizables
-│   ├── README.md                  # Documentación de workflows
-│   └── code-review-backend-py.yml # Workflow de code review
-└── scripts/                        # Scripts de utilidad
-    ├── sync-agents.sh             # Script de sincronización de agentes
-    ├── sync-workflows.sh          # Script de sincronización de workflows
-    ├── validate-agents.sh         # Script de validación de agentes
-    └── README.md                  # Documentación de scripts
+├── git-workflows/                        # Workflows reutilizables
+│   ├── README.md                        # Documentación de workflows
+│   ├── python/
+│   │   └── code-review-backend-py.yml  # Workflow de code review Python
+│   └── flutter/
+│       └── code-review-flutter-app.yml # Workflow de code review Flutter
+└── scripts/                              # Scripts de utilidad
+    ├── sync-workflows.sh                # Script de sincronización de workflows
+    ├── validate-agents.sh               # Script de validación de agentes
+    └── README.md                        # Documentación de scripts
 ```
 
-## Configuración para Equipos
+### Arquitectura de Plugins
 
-### Opción A: Variable de Entorno Global
+El proyecto usa una arquitectura de plugins que organiza agentes y skills por dominio tecnológico:
 
-Configurar para todo el equipo en sus archivos de shell:
+- **`plugins/general/`**: Agentes agnósticos que funcionan en cualquier lenguaje
+- **`plugins/python-development/`**: Ecosistema completo Python (agentes + skills)
+- **`plugins/flutter-development/`**: Ecosistema Flutter (agentes + skills)
+
+Cada plugin contiene:
+- **`agents/`**: Archivos .md con instrucciones y personalidad de agentes
+- **`skills/`**: Archivos .md con capacidades ejecutables (herramientas + funciones)
+- **`README.md`**: Documentación específica del plugin
+
+## Configuración para Equipos y Empresas
+
+### Opción Recomendada: Marketplace Privado
+
+Crea tu propio marketplace privado para tu empresa:
+
+#### 1. Fork este repositorio
+```bash
+# Fork a tu organización
+https://github.com/tu-empresa/claude-agents
+```
+
+#### 2. Personaliza plugins
+```bash
+# Agrega agentes específicos de tu empresa
+mkdir plugins/company-standards
+# Agrega tus agentes personalizados
+```
+
+#### 3. Configura en el proyecto
+```json
+// .claude/settings.json
+{
+  "plugin_marketplaces": ["tu-empresa/claude-agents"],
+  "plugins": [
+    "general@agents",
+    "python-development@agents",
+    "company-standards@agents"
+  ]
+}
+```
+
+#### 4. Commitea la configuración
+```bash
+git add .claude/settings.json
+git commit -m "Add Claude Code plugin configuration"
+```
+
+Todo el equipo obtiene automáticamente los mismos plugins al clonar el proyecto.
+
+### Marketplace Público + Plugins Privados
+
+Combina este marketplace público con plugins privados de tu empresa:
+
+```json
+// .claude/settings.json
+{
+  "plugin_marketplaces": [
+    "Grinest/agents",        // Público
+    "tu-empresa/private-agents"         // Privado
+  ],
+  "plugins": [
+    "python-development@agents",  // Del público
+    "company-standards@private-agents"   // Del privado
+  ]
+}
+```
+
+### Configuración por Usuario (Opcional)
+
+Para configuración personal adicional:
 
 ```bash
-# En .bashrc, .zshrc, etc.
-export AGENTS_REPO="https://github.com/empresa/company-claude-agents.git"
+# Cada desarrollador puede agregar marketplaces adicionales
+/plugin marketplace add usuario/personal-agents
+
+# E instalar plugins personales
+/plugin install my-utils@personal-agents
 ```
-
-### Opción B: Alias Personalizado
-
-Crear un alias específico para el equipo:
-
-```bash
-alias sync-company-agents="~/.claude-agents/scripts/sync-agents.sh https://github.com/empresa/agents.git"
-```
-
-### Opción C: Fork del Repositorio
-
-1. Hacer fork de este repositorio
-2. Modificar `DEFAULT_AGENTS_REPO` en `scripts/sync-agents.sh`
-3. Agregar/modificar agentes según necesidades del equipo
-4. Compartir el fork con el equipo
-
-## Uso de los Agentes
-
-Una vez instalados, los agentes están disponibles en Claude Code:
-
-### En Claude Code CLI
-
-```bash
-# Los agentes están automáticamente disponibles
-# Claude Code los carga desde .claude/agents/
-```
-
-### Invocar un Agente
-
-Los agentes se invocan basándose en el contexto de tu solicitud. Por ejemplo:
-
-- **Architect**: "Analiza la arquitectura de este proyecto y recomienda cómo agregar autenticación"
-- **Backend-Py**: "Implementa un interactor para crear usuarios siguiendo Clean Architecture"
-- **QA**: "Escribe tests unitarios para este interactor con >90% de cobertura"
 
 ## Crear Nuevos Agentes
 
 ### Estructura de un Agente
 
-Cada agente es un archivo Markdown con frontmatter YAML:
+Cada agente es un archivo Markdown con frontmatter YAML, organizado dentro de la estructura de plugins:
 
 ```markdown
 ---
@@ -403,7 +549,42 @@ Your agent prompt here...
 - `model`: Modelo a usar (`inherit`, `sonnet`, `opus`, `haiku`)
 - `color`: Color para la UI (`blue`, `green`, `yellow`, `red`, `purple`, `cyan`)
 
-### Ejemplo
+### Agregar un Nuevo Agente a un Plugin Existente
+
+```bash
+# 1. Crear el archivo del agente
+touch plugins/python-development/agents/nuevo-agente.md
+
+# 2. Agregar frontmatter y contenido
+# Ver ejemplo abajo
+
+# 3. Validar el agente
+./scripts/validate-agents.sh
+
+# 4. Actualizar README del plugin
+# Editar plugins/python-development/README.md
+```
+
+### Crear un Nuevo Plugin
+
+Para crear un nuevo plugin (ej: `javascript-development`):
+
+```bash
+# 1. Crear estructura
+mkdir -p plugins/javascript-development/agents
+mkdir -p plugins/javascript-development/skills
+
+# 2. Crear README del plugin
+touch plugins/javascript-development/README.md
+
+# 3. Agregar agentes
+touch plugins/javascript-development/agents/frontend-react.md
+
+# 4. Validar
+./scripts/validate-agents.sh
+```
+
+### Ejemplo de Agente
 
 ```markdown
 ---
@@ -418,21 +599,26 @@ color: cyan
 You are a specialized React frontend development agent...
 ```
 
+Ver [documentación de plugins](./plugins/README.md) para más detalles sobre convenciones y estructura.
+
 ## Contribuir
 
 ### Agregar un Nuevo Agente
 
 1. Fork este repositorio
-2. Crea un nuevo archivo en `agents/` siguiendo la estructura
-3. Prueba el agente localmente
-4. Crea un Pull Request con descripción detallada
+2. Crea un nuevo archivo en `plugins/[plugin-name]/agents/` o `plugins/[plugin-name]/skills/`
+3. Agrega el agente/skill a `plugin.json` del plugin
+4. Prueba el agente localmente
+5. Actualiza el README del plugin
+6. Crea un Pull Request con descripción detallada
 
 ### Mejorar un Agente Existente
 
 1. Fork el repositorio
-2. Modifica el agente en `agents/`
+2. Modifica el agente en `plugins/[plugin-name]/agents/`
 3. Documenta los cambios
-4. Crea un Pull Request
+4. Incrementa la versión en `plugin.json` si es necesario
+5. Crea un Pull Request
 
 ### Reportar Issues
 
@@ -450,81 +636,138 @@ Si encuentras problemas:
 ### Startup con Clean Architecture
 
 ```bash
-# Instalar agentes de arquitectura y backend
-./scripts/sync-agents.sh
-# Selecciona: 2 → Ingresa: 1 2
+# 1. Agregar marketplace y instalar plugins
+/plugin marketplace add Grinest/agents
+/plugin install general@agents python-development@agents
 
-# Usar el agente de arquitectura
+# 2. Usar el agente de arquitectura
 "Analiza este proyecto y recomienda la mejor forma de implementar un sistema de autenticación"
 
-# Usar el agente de backend
+# 3. Usar el agente de backend
 "Implementa el sistema de autenticación siguiendo las recomendaciones del arquitecto"
+
+# 4. Usar skill para crear endpoint
+/backend-py-celery Create authentication endpoint with JWT tokens
 ```
 
 ### Empresa con Repositorio Privado
 
 ```bash
-# Configurar repo privado de la empresa
-export AGENTS_REPO="git@github.com:empresa/private-agents.git"
+# 1. Crear fork privado para la empresa
+# GitHub: Fork Grinest/agents a empresa/claude-agents
 
-# Instalar agentes de empresa
-sync-agents
+# 2. Personalizar plugins
+git clone git@github.com:empresa/claude-agents.git
+cd claude-agents
+# Agregar plugins personalizados...
 
-# Los agentes personalizados ahora están disponibles
+# 3. Configurar en proyectos de la empresa
+# En cada proyecto: .claude/settings.json
+{
+  "plugin_marketplaces": ["empresa/claude-agents"],
+  "plugins": ["python-development@agents"]
+}
+
+# 4. Los agentes personalizados están disponibles automáticamente
 ```
 
 ### Freelancer con Múltiples Clientes
 
 ```bash
-# Cliente A
-alias sync-agents-clienta="sync-agents https://github.com/clienta/agents.git"
+# Cliente A - Configuración en .claude/settings.json del proyecto
+{
+  "plugin_marketplaces": ["cliente-a/agents"],
+  "plugins": ["python-development@agents"]
+}
 
-# Cliente B
-alias sync-agents-clientb="sync-agents https://github.com/clientb/agents.git"
+# Cliente B - Configuración en .claude/settings.json del proyecto
+{
+  "plugin_marketplaces": ["cliente-b/agents"],
+  "plugins": ["javascript-development@agents"]
+}
 
-# Cambiar entre proyectos fácilmente
-cd ~/projects/clienta && sync-agents-clienta
-cd ~/projects/clientb && sync-agents-clientb
+# Cambiar entre proyectos automáticamente
+cd ~/projects/cliente-a  # Usa plugins de cliente A
+cd ~/projects/cliente-b  # Usa plugins de cliente B
+# Los plugins se cargan automáticamente según el proyecto
 ```
 
-## Actualización de Agentes
+## Actualización de Plugins
 
-Para actualizar agentes a la última versión:
+Los plugins se pueden actualizar fácilmente:
 
 ```bash
-# Ejecutar nuevamente el script
-./scripts/sync-agents.sh
+# Actualizar un plugin específico
+/plugin update python-development@agents
 
-# Seleccionar los agentes a actualizar
-# Los archivos existentes serán sobrescritos
+# Actualizar todos los plugins de un marketplace
+/plugin update --marketplace claude-agents
+
+# Ver versiones disponibles
+/plugin show python-development@agents
+```
+
+### Auto-updates (Opcional)
+
+Configura auto-updates para mantener plugins actualizados automáticamente:
+
+```json
+// .claude/settings.json
+{
+  "plugin_auto_update": true,
+  "plugin_marketplaces": ["Grinest/agents"]
+}
 ```
 
 ## Requisitos
 
-- Git
-- Bash 4.0+
-- Claude Code CLI
-- Permisos de escritura en el proyecto
+- **Claude Code CLI** (2026 o superior)
+- **Git** (para marketplaces en GitHub/GitLab)
+- Internet (para instalar plugins remotos)
 
 ## Solución de Problemas
 
-### Los agentes no aparecen en Claude Code
+### Los plugins no aparecen
 
-1. Verifica que los archivos estén en `.claude/agents/`
-2. Reinicia Claude Code
-3. Verifica que los archivos tengan el formato correcto
+```bash
+# Verificar plugins instalados
+/plugin list
 
-### Error al clonar repositorio
+# Verificar marketplaces configurados
+/plugin marketplace list
 
-1. Verifica tu conexión a internet
-2. Verifica que tengas acceso al repositorio
-3. Para repos privados, configura SSH o tokens de acceso
+# Reinstalar plugin
+/plugin uninstall python-development@agents
+/plugin install python-development@agents
+```
 
-### Agentes no se sincronizan
+### Error al agregar marketplace
 
-1. Verifica que la carpeta `agents/` exista en el repo
-2. Verifica que los archivos `.md` estén presentes
-3. Ejecuta con `bash -x` para debug: `bash -x scripts/sync-agents.sh`
+1. Verifica que el repositorio exista y sea público (o tengas acceso)
+2. Verifica que contenga `.claude-plugin/marketplace.json`
+3. Para repos privados, configura autenticación Git (SSH o tokens)
+
+```bash
+# Ver detalles del error
+/plugin marketplace add owner/repo --verbose
+```
+
+### Los agentes no se activan automáticamente
+
+1. Verifica que el plugin esté instalado: `/plugin list`
+2. Los agentes se activan por contexto - prueba con una solicitud específica
+3. Para skills, usa el prefijo `/`: `/backend-py-celery --help`
+4. Reinicia Claude Code si es necesario
+
+### Conflictos de nombres entre plugins
+
+Los plugins tienen namespaces automáticos para evitar conflictos:
+
+```bash
+# Si dos plugins tienen el mismo skill, especifica el namespace
+/python-development:backend-py-celery
+/my-plugin:backend-py-celery
+```
 
 ## Recursos
 
