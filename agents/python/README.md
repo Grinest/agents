@@ -6,6 +6,7 @@ This directory contains specialized Claude Code agents for Python development.
 
 ### Development
 - **backend-py.md**: Backend Python Development Agent specializing in Clean Architecture and Hexagonal Architecture for scalable and maintainable backend systems.
+- **backend-py-celery.md**: Backend Python Celery Development Agent specializing in FastAPI routes and Celery scheduled tasks with Clean Architecture, dependency injection, and centralized repository libraries.
 - **qa-backend-py.md**: Quality Assurance agent for Python backend applications with comprehensive testing strategies.
 
 ### Code Review
