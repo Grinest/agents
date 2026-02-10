@@ -37,7 +37,7 @@ rm -rf .claude/agents
 ### Step 2: Add New Marketplace
 
 ```bash
-/plugin marketplace add juanpaconpa/claude-agents
+/plugin marketplace add Grinest/agents
 ```
 
 ### Step 3: Install Plugins
@@ -46,7 +46,7 @@ Replace your old installation with modern plugins:
 
 #### Old Way ❌
 ```bash
-git clone https://github.com/juanpaconpa/claude-agents.git
+git clone https://github.com/Grinest/agents.git
 cd claude-agents
 ./scripts/sync-agents.sh
 # Select agents: 1 2 3
@@ -54,9 +54,9 @@ cd claude-agents
 
 #### New Way ✅
 ```bash
-/plugin install general@claude-agents
-/plugin install python-development@claude-agents
-/plugin install flutter-development@claude-agents
+/plugin install general@agents
+/plugin install python-development@agents
+/plugin install flutter-development@agents
 ```
 
 ### Step 4: Update Team Configuration
@@ -136,7 +136,7 @@ export AGENTS_REPO="git@github.com:empresa/private-agents.git"
 #### New Setup
 ```bash
 # One-time: Create company marketplace
-# Fork juanpaconpa/claude-agents to empresa/agents
+# Fork Grinest/agents to empresa/agents
 # Add company-specific plugins
 
 # In each project: .claude/settings.json (committed)
@@ -216,7 +216,7 @@ A: Plugin marketplaces work with private repos. Configure Git authentication (SS
 
 A: Yes! You can add multiple marketplaces:
 ```bash
-/plugin marketplace add juanpaconpa/claude-agents  # Public
+/plugin marketplace add Grinest/agents  # Public
 /plugin marketplace add company/private-agents     # Private
 ```
 
@@ -224,7 +224,7 @@ A: Yes! You can add multiple marketplaces:
 
 A: Use `/plugin update`:
 ```bash
-/plugin update python-development@claude-agents
+/plugin update python-development@agents
 /plugin update --marketplace claude-agents  # Update all from marketplace
 ```
 
@@ -232,14 +232,14 @@ A: Use `/plugin update`:
 
 A: Pin to a specific version in `plugin.json` or roll back:
 ```bash
-/plugin uninstall python-development@claude-agents
-/plugin install python-development@claude-agents@1.0.0  # Specific version
+/plugin uninstall python-development@agents
+/plugin install python-development@agents@1.0.0  # Specific version
 ```
 
 ## 📞 Support
 
 - **Documentation**: See [README.md](./README.md) for full plugin documentation
-- **Issues**: Report problems at https://github.com/juanpaconpa/claude-agents/issues
+- **Issues**: Report problems at https://github.com/Grinest/agents/issues
 - **Questions**: Open a discussion on GitHub
 
 ## 📚 Additional Resources

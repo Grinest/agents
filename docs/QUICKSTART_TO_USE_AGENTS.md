@@ -8,12 +8,12 @@ Guía rápida para comenzar a usar agentes de Claude y workflows de GitHub Actio
 
 ```bash
 # 1. Agregar el marketplace
-/plugin marketplace add juanpaconpa/claude-agents
+/plugin marketplace add Grinest/agents
 
 # 2. Instalar plugins que necesites
-/plugin install general@claude-agents                # Arquitectura
-/plugin install python-development@claude-agents     # Python backend
-/plugin install flutter-development@claude-agents    # Flutter
+/plugin install general@agents                # Arquitectura
+/plugin install python-development@agents     # Python backend
+/plugin install flutter-development@agents    # Flutter
 
 # 3. Verificar instalación
 /plugin list
@@ -46,15 +46,15 @@ El sistema de plugins es el método oficial de Claude Code 2026:
 
 ```bash
 # Paso 1: Agregar marketplace
-/plugin marketplace add juanpaconpa/claude-agents
+/plugin marketplace add Grinest/agents
 
 # Paso 2: Ver plugins disponibles
 /plugin marketplace browse claude-agents
 
 # Paso 3: Instalar plugins
-/plugin install general@claude-agents
-/plugin install python-development@claude-agents
-/plugin install flutter-development@claude-agents
+/plugin install general@agents
+/plugin install python-development@agents
+/plugin install flutter-development@agents
 ```
 
 **Ventajas**:
@@ -72,11 +72,11 @@ Para que todo el equipo tenga los mismos plugins automáticamente:
 # Crear configuración en tu proyecto
 cat > .claude/settings.json << 'EOF'
 {
-  "plugin_marketplaces": ["juanpaconpa/claude-agents"],
+  "plugin_marketplaces": ["Grinest/agents"],
   "plugins": [
-    "general@claude-agents",
-    "python-development@claude-agents",
-    "flutter-development@claude-agents"
+    "general@agents",
+    "python-development@agents",
+    "flutter-development@agents"
   ]
 }
 EOF
@@ -94,7 +94,7 @@ Si por alguna razón no puedes usar el sistema de plugins:
 
 ```bash
 # Clonar repositorio
-git clone https://github.com/juanpaconpa/claude-agents.git
+git clone https://github.com/Grinest/agents.git
 cd claude-agents
 
 # Copiar agentes manualmente
@@ -117,7 +117,7 @@ cp plugins/python-development/skills/backend-py-celery.md .claude/agents/
 /plugin list
 
 # Ver detalles de un plugin
-/plugin show python-development@claude-agents
+/plugin show python-development@agents
 
 # Listar agentes disponibles
 /agents list
@@ -168,7 +168,7 @@ Agentes agnósticos de lenguaje para arquitectura y diseño.
 |--------|-------------|
 | **architect** | Especialista en arquitectura de software y system design |
 
-**Instalar**: `/plugin install general@claude-agents`
+**Instalar**: `/plugin install general@agents`
 
 ---
 
@@ -184,7 +184,7 @@ Agentes y skills para desarrollo backend Python con Clean Architecture.
 | **reviewer-library-py** | Agente | Code review para librerías Python |
 | **backend-py-celery** | Skill | Desarrollo de FastAPI routes y Celery tasks |
 
-**Instalar**: `/plugin install python-development@claude-agents`
+**Instalar**: `/plugin install python-development@agents`
 
 ---
 
@@ -196,7 +196,7 @@ Agentes para desarrollo de aplicaciones Flutter/Dart.
 |--------|-------------|
 | **reviewer-flutter-app** | Code review automatizado para apps Flutter |
 
-**Instalar**: `/plugin install flutter-development@claude-agents`
+**Instalar**: `/plugin install flutter-development@agents`
 
 ---
 
@@ -243,9 +243,9 @@ tu-proyecto/
 /plugin list
 
 # Deberías ver:
-# ✓ general@claude-agents (v1.0.0)
-# ✓ python-development@claude-agents (v1.0.0)
-# ✓ flutter-development@claude-agents (v1.0.0)
+# ✓ general@agents (v1.0.0)
+# ✓ python-development@agents (v1.0.0)
+# ✓ flutter-development@agents (v1.0.0)
 
 # 2. Verificar agentes disponibles
 /agents list
@@ -318,13 +318,13 @@ gh pr create --title "Test Workflow" --body "Testing code review"
 
 ```bash
 # Actualizar un plugin específico
-/plugin update python-development@claude-agents
+/plugin update python-development@agents
 
 # Actualizar todos los plugins de un marketplace
 /plugin update --marketplace claude-agents
 
 # Ver versiones disponibles
-/plugin show python-development@claude-agents
+/plugin show python-development@agents
 ```
 
 ### Actualizar Workflows
@@ -348,10 +348,10 @@ Commitea la configuración al repositorio para que todos tengan los mismos plugi
 ```json
 // .claude/settings.json
 {
-  "plugin_marketplaces": ["juanpaconpa/claude-agents"],
+  "plugin_marketplaces": ["Grinest/agents"],
   "plugins": [
-    "general@claude-agents",
-    "python-development@claude-agents"
+    "general@agents",
+    "python-development@agents"
   ]
 }
 ```
@@ -370,14 +370,14 @@ Para empresas con agentes personalizados:
 
 ```bash
 # 1. Fork este repositorio a tu organización
-# GitHub: Fork juanpaconpa/claude-agents → empresa/claude-agents
+# GitHub: Fork Grinest/agents → empresa/claude-agents
 
 # 2. Personaliza plugins
 # Agrega tus agentes en plugins/company-standards/
 
 # 3. Usa marketplace privado
 /plugin marketplace add empresa/claude-agents
-/plugin install company-standards@claude-agents
+/plugin install company-standards@agents
 ```
 
 ### Opción C: Múltiples Marketplaces
@@ -388,11 +388,11 @@ Combina marketplace público con privado:
 // .claude/settings.json
 {
   "plugin_marketplaces": [
-    "juanpaconpa/claude-agents",    // Público
+    "Grinest/agents",    // Público
     "empresa/private-agents"         // Privado
   ],
   "plugins": [
-    "python-development@claude-agents",  // Público
+    "python-development@agents",  // Público
     "company-standards@private-agents"   // Privado
   ]
 }
@@ -414,8 +414,8 @@ Combina marketplace público con privado:
 /plugin list
 
 # Reinstalar plugin
-/plugin uninstall python-development@claude-agents
-/plugin install python-development@claude-agents
+/plugin uninstall python-development@agents
+/plugin install python-development@agents
 ```
 
 #### Error al agregar marketplace
@@ -464,9 +464,9 @@ Combina marketplace público con privado:
 
 ```bash
 # Instalar plugins necesarios
-/plugin marketplace add juanpaconpa/claude-agents
-/plugin install general@claude-agents
-/plugin install python-development@claude-agents
+/plugin marketplace add Grinest/agents
+/plugin install general@agents
+/plugin install python-development@agents
 
 # Instalar workflow de code review
 ./scripts/sync-workflows.sh  # Selecciona: code-review-backend-py
@@ -491,7 +491,7 @@ cd empresa/claude-agents
 # .claude/settings.json:
 {
   "plugin_marketplaces": ["empresa/claude-agents"],
-  "plugins": ["python-development@claude-agents"]
+  "plugins": ["python-development@agents"]
 }
 ```
 
@@ -572,8 +572,8 @@ cd ~/projects/cliente-b
 
 1. **Documentación**: Revisa la [documentación completa](../README.md)
 2. **Migración**: Si vienes de scripts bash, lee [MIGRATION.md](../MIGRATION.md)
-3. **Issues**: Busca en [issues existentes](https://github.com/juanpaconpa/claude-agents/issues)
-4. **Nuevo issue**: Crea un [nuevo issue](https://github.com/juanpaconpa/claude-agents/issues/new) con:
+3. **Issues**: Busca en [issues existentes](https://github.com/Grinest/agents/issues)
+4. **Nuevo issue**: Crea un [nuevo issue](https://github.com/Grinest/agents/issues/new) con:
    - Descripción del problema
    - Pasos para reproducir
    - Output de `/plugin list` y `/plugin show plugin-name`
@@ -586,8 +586,8 @@ cd ~/projects/cliente-b
 
 ```bash
 # En Claude Code, ejecuta:
-/plugin marketplace add juanpaconpa/claude-agents
-/plugin install python-development@claude-agents
+/plugin marketplace add Grinest/agents
+/plugin install python-development@agents
 
 # ¡Listo! Ahora tienes agentes especializados disponibles
 ```

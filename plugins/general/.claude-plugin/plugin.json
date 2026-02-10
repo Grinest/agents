@@ -3,13 +3,13 @@
   "description": "Language-agnostic agents for software architecture and system design",
   "version": "1.0.0",
   "author": {
-    "name": "Juan Pablo Contreras",
-    "url": "https://github.com/juanpaconpa"
+    "name": "Grinest",
+    "url": "https://github.com/Grinest"
   },
-  "homepage": "https://github.com/juanpaconpa/claude-agents",
+  "homepage": "https://github.com/Grinest/agents",
   "repository": {
     "type": "git",
-    "url": "https://github.com/juanpaconpa/claude-agents.git"
+    "url": "https://github.com/Grinest/agents.git"
   },
   "agents": [
     "agents/architect.md"

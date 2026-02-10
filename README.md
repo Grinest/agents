@@ -221,7 +221,7 @@ cp git-workflows/*.yml .github/workflows/
 
 ```bash
 # Clonar en directorio home
-git clone https://github.com/juanpaconpa/claude-agents.git ~/.claude-agents
+git clone https://github.com/Grinest/agents.git ~/.claude-agents
 
 # Crear alias
 echo 'alias sync-workflows="~/.claude-agents/scripts/sync-workflows.sh"' >> ~/.bashrc
@@ -265,7 +265,7 @@ El método moderno usa el sistema de plugins de Claude Code:
 #### 1. Agregar el Marketplace
 
 ```bash
-/plugin marketplace add juanpaconpa/claude-agents
+/plugin marketplace add Grinest/agents
 ```
 
 #### 2. Instalar Plugins
@@ -274,16 +274,16 @@ Instala los plugins que necesites:
 
 ```bash
 # Agentes generales (arquitectura)
-/plugin install general@claude-agents
+/plugin install general@agents
 
 # Desarrollo Python (backend, QA, review, skill Celery)
-/plugin install python-development@claude-agents
+/plugin install python-development@agents
 
 # Desarrollo Flutter (review)
-/plugin install flutter-development@claude-agents
+/plugin install flutter-development@agents
 
 # O instalar todo
-/plugin install general@claude-agents python-development@claude-agents flutter-development@claude-agents
+/plugin install general@agents python-development@agents flutter-development@agents
 ```
 
 #### 3. Verificar Instalación
@@ -293,7 +293,7 @@ Instala los plugins que necesites:
 /plugin list
 
 # Ver detalles de un plugin
-/plugin show python-development@claude-agents
+/plugin show python-development@agents
 ```
 
 ### Configuración para Equipos
@@ -302,11 +302,11 @@ Para que todo el equipo tenga los mismos plugins automáticamente, agrega a `.cl
 
 ```json
 {
-  "plugin_marketplaces": ["juanpaconpa/claude-agents"],
+  "plugin_marketplaces": ["Grinest/agents"],
   "plugins": [
-    "general@claude-agents",
-    "python-development@claude-agents",
-    "flutter-development@claude-agents"
+    "general@agents",
+    "python-development@agents",
+    "flutter-development@agents"
   ]
 }
 ```
@@ -328,7 +328,7 @@ Los miembros del equipo solo necesitan clonar el proyecto - los plugins se insta
 
 ```bash
 # Actualizar un plugin específico
-/plugin update python-development@claude-agents
+/plugin update python-development@agents
 
 # Actualizar todos los plugins del marketplace
 /plugin update --marketplace claude-agents
@@ -478,9 +478,9 @@ mkdir plugins/company-standards
 {
   "plugin_marketplaces": ["tu-empresa/claude-agents"],
   "plugins": [
-    "general@claude-agents",
-    "python-development@claude-agents",
-    "company-standards@claude-agents"
+    "general@agents",
+    "python-development@agents",
+    "company-standards@agents"
   ]
 }
 ```
@@ -501,11 +501,11 @@ Combina este marketplace público con plugins privados de tu empresa:
 // .claude/settings.json
 {
   "plugin_marketplaces": [
-    "juanpaconpa/claude-agents",        // Público
+    "Grinest/agents",        // Público
     "tu-empresa/private-agents"         // Privado
   ],
   "plugins": [
-    "python-development@claude-agents",  // Del público
+    "python-development@agents",  // Del público
     "company-standards@private-agents"   // Del privado
   ]
 }
@@ -637,8 +637,8 @@ Si encuentras problemas:
 
 ```bash
 # 1. Agregar marketplace y instalar plugins
-/plugin marketplace add juanpaconpa/claude-agents
-/plugin install general@claude-agents python-development@claude-agents
+/plugin marketplace add Grinest/agents
+/plugin install general@agents python-development@agents
 
 # 2. Usar el agente de arquitectura
 "Analiza este proyecto y recomienda la mejor forma de implementar un sistema de autenticación"
@@ -654,7 +654,7 @@ Si encuentras problemas:
 
 ```bash
 # 1. Crear fork privado para la empresa
-# GitHub: Fork juanpaconpa/claude-agents a empresa/claude-agents
+# GitHub: Fork Grinest/agents a empresa/claude-agents
 
 # 2. Personalizar plugins
 git clone git@github.com:empresa/claude-agents.git
@@ -665,7 +665,7 @@ cd claude-agents
 # En cada proyecto: .claude/settings.json
 {
   "plugin_marketplaces": ["empresa/claude-agents"],
-  "plugins": ["python-development@claude-agents"]
+  "plugins": ["python-development@agents"]
 }
 
 # 4. Los agentes personalizados están disponibles automáticamente
@@ -698,13 +698,13 @@ Los plugins se pueden actualizar fácilmente:
 
 ```bash
 # Actualizar un plugin específico
-/plugin update python-development@claude-agents
+/plugin update python-development@agents
 
 # Actualizar todos los plugins de un marketplace
 /plugin update --marketplace claude-agents
 
 # Ver versiones disponibles
-/plugin show python-development@claude-agents
+/plugin show python-development@agents
 ```
 
 ### Auto-updates (Opcional)
@@ -715,7 +715,7 @@ Configura auto-updates para mantener plugins actualizados automáticamente:
 // .claude/settings.json
 {
   "plugin_auto_update": true,
-  "plugin_marketplaces": ["juanpaconpa/claude-agents"]
+  "plugin_marketplaces": ["Grinest/agents"]
 }
 ```
 
@@ -737,8 +737,8 @@ Configura auto-updates para mantener plugins actualizados automáticamente:
 /plugin marketplace list
 
 # Reinstalar plugin
-/plugin uninstall python-development@claude-agents
-/plugin install python-development@claude-agents
+/plugin uninstall python-development@agents
+/plugin install python-development@agents
 ```
 
 ### Error al agregar marketplace

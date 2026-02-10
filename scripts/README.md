@@ -76,8 +76,8 @@ WORKFLOWS_REPO=https://github.com/company/workflows.git ./scripts/sync-workflows
 ./scripts/sync-agents.sh
 
 # New way (2026)
-/plugin marketplace add juanpaconpa/claude-agents
-/plugin install python-development@claude-agents
+/plugin marketplace add Grinest/agents
+/plugin install python-development@agents
 ```
 
 **See**: [MIGRATION.md](../MIGRATION.md) for complete migration guide.
@@ -91,12 +91,12 @@ As of 2026, agent installation uses Claude Code's native plugin system:
 ### Installation
 ```bash
 # Add marketplace
-/plugin marketplace add juanpaconpa/claude-agents
+/plugin marketplace add Grinest/agents
 
 # Install plugins
-/plugin install general@claude-agents
-/plugin install python-development@claude-agents
-/plugin install flutter-development@claude-agents
+/plugin install general@agents
+/plugin install python-development@agents
+/plugin install flutter-development@agents
 ```
 
 ### Benefits over bash scripts
