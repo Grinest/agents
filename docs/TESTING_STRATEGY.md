@@ -44,10 +44,10 @@ Para archivos de agentes (prompts en Markdown), **NO necesitas testing exhaustiv
 **Herramientas posibles:**
 ```bash
 # Spell checking (ejemplo)
-aspell check agents/architect.md
+aspell check plugins/general/agents/architect.md
 
 # Markdown linting
-markdownlint agents/*.md
+markdownlint 'plugins/**/agents/*.md' 'plugins/**/skills/*.md'
 
 # Grammar checking (requiere herramientas externas)
 ```
@@ -74,16 +74,19 @@ markdownlint agents/*.md
 │     • Pre-commit hook                       │
 │     • CI/CD en GitHub Actions               │
 │     • ./scripts/validate-agents.sh          │
+│     • Valida plugins/ estructura            │
 ├─────────────────────────────────────────────┤
 │  2. Code Review Manual                      │
 │     • Revisar claridad del prompt           │
 │     • Validar instrucciones completas       │
 │     • Verificar ejemplos útiles             │
+│     • Verificar plugin.json metadata        │
 ├─────────────────────────────────────────────┤
 │  3. Testing Manual Ad-Hoc                   │
 │     • Probar agente en proyectos reales     │
 │     • Iterar basado en feedback             │
 │     • Documentar casos de uso               │
+│     • Validar instalación via plugins       │
 └─────────────────────────────────────────────┘
 ```
 
@@ -106,10 +109,10 @@ markdownlint agents/*.md
 ║        Agent Validation Test Suite           ║
 ╚═══════════════════════════════════════════════╝
 
-✓ Agents directory exists
-✓ Found 3 agent file(s)
+✓ Plugins directory exists
+✓ Found 7 agent file(s)
 
-Testing agent: architect
+Testing agent: general/agents/architect
 ────────────────────────────────────────────────
 ✓ File is not empty
 ✓ Has YAML frontmatter delimiter
@@ -121,10 +124,10 @@ Testing agent: architect
 ╔═══════════════════════════════════════════════╗
 ║              Validation Summary               ║
 ╠═══════════════════════════════════════════════╣
-║  Passed:  44
+║  Passed:  100
 ║  Failed:  0
 ║  Warnings: 0
-║  Total:   44
+║  Total:   100
 ╚═══════════════════════════════════════════════╝
 
 ✓ All validation tests passed!
