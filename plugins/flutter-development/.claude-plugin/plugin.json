@@ -1,0 +1,25 @@
+{
+  "name": "flutter-development",
+  "description": "Flutter and Dart development agents for mobile app code review",
+  "version": "1.0.0",
+  "author": {
+    "name": "Juan Pablo Contreras",
+    "url": "https://github.com/juanpaconpa"
+  },
+  "homepage": "https://github.com/juanpaconpa/claude-agents",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/juanpaconpa/claude-agents.git"
+  },
+  "agents": [
+    "agents/reviewer-flutter-app.md"
+  ],
+  "tags": [
+    "flutter",
+    "dart",
+    "mobile",
+    "code-review",
+    "app-development"
+  ],
+  "license": "MIT"
+}

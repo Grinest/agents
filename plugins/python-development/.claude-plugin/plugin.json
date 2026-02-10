@@ -1,0 +1,33 @@
+{
+  "name": "python-development",
+  "description": "Python backend development agents and skills with Clean Architecture, FastAPI, and Celery",
+  "version": "1.0.0",
+  "author": {
+    "name": "Juan Pablo Contreras",
+    "url": "https://github.com/juanpaconpa"
+  },
+  "homepage": "https://github.com/juanpaconpa/claude-agents",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/juanpaconpa/claude-agents.git"
+  },
+  "agents": [
+    "agents/backend-py.md",
+    "agents/qa-backend-py.md",
+    "agents/reviewer-backend-py.md",
+    "agents/reviewer-library-py.md"
+  ],
+  "skills": [
+    "skills/backend-py-celery.md"
+  ],
+  "tags": [
+    "python",
+    "backend",
+    "clean-architecture",
+    "fastapi",
+    "celery",
+    "testing",
+    "code-review"
+  ],
+  "license": "MIT"
+}

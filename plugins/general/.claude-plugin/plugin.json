@@ -1,0 +1,25 @@
+{
+  "name": "general",
+  "description": "Language-agnostic agents for software architecture and system design",
+  "version": "1.0.0",
+  "author": {
+    "name": "Juan Pablo Contreras",
+    "url": "https://github.com/juanpaconpa"
+  },
+  "homepage": "https://github.com/juanpaconpa/claude-agents",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/juanpaconpa/claude-agents.git"
+  },
+  "agents": [
+    "agents/architect.md"
+  ],
+  "tags": [
+    "architecture",
+    "design",
+    "planning",
+    "system-design",
+    "agnostic"
+  ],
+  "license": "MIT"
+}
