@@ -8,7 +8,13 @@ Este repositorio proporciona una colección de agentes de Claude especializados 
 
 ## Agentes Disponibles
 
-### 1. Architect Agent (`architect.md`)
+Los agentes están organizados en plugins por dominio tecnológico. Cada plugin contiene agentes especializados y skills ejecutables.
+
+### General Plugin
+
+Agentes agnósticos de lenguaje que funcionan en cualquier proyecto.
+
+#### 1. Architect Agent (`[general/agents] architect`)
 **Especialista en Arquitectura de Software**
 
 Agente enfocado en análisis, evaluación y recomendación de soluciones arquitectónicas sin escribir código de implementación.
@@ -29,7 +35,11 @@ Agente enfocado en análisis, evaluación y recomendación de soluciones arquite
 - Planificación de proyectos
 - Documentación de arquitectura
 
-### 2. Backend Python Agent (`backend-py.md`)
+### Python Development Plugin
+
+Agentes y skills especializados para desarrollo Python backend.
+
+#### 2. Backend Python Agent (`[python-development/agents] backend-py`)
 **Desarrollo Backend Python con Clean Architecture**
 
 Agente especializado en desarrollo backend Python usando Clean Architecture y Hexagonal Architecture (Ports & Adapters).
@@ -58,7 +68,7 @@ Agente especializado en desarrollo backend Python usando Clean Architecture y He
 - Migraciones de base de datos
 - Refactorización hacia arquitectura limpia
 
-### 3. QA Backend Python Agent (`qa-backend-py.md`)
+#### 3. QA Backend Python Agent (`[python-development/agents] qa-backend-py`)
 **Testing y QA para Backend Python**
 
 Agente especializado en testing, QA y chaos engineering para sistemas backend Python.
@@ -81,7 +91,7 @@ Agente especializado en testing, QA y chaos engineering para sistemas backend Py
 - Validar seguridad del código
 - Testing de performance
 
-### 4. Reviewer Backend Python Agent (`reviewer-backend-py.md`)
+#### 4. Reviewer Backend Python Agent (`[python-development/agents] reviewer-backend-py`)
 **Code Review Automatizado para Backend Python**
 
 Agente especializado en revisión de código que combina las perspectivas del Architect, Backend-Py y QA para proporcionar reviews completas de PRs.
@@ -101,6 +111,54 @@ Agente especializado en revisión de código que combina las perspectivas del Ar
 - Asegurar estándares de arquitectura
 - Verificar cobertura de testing
 - Auditorías de seguridad
+
+#### 5. Reviewer Library Python Agent (`[python-development/agents] reviewer-library-py`)
+**Code Review para Librerías Python**
+
+Agente especializado en revisión de código para librerías Python, enfocado en API design, documentación y distribución de paquetes.
+
+**Cuándo usar:**
+- Revisión de PRs en proyectos de librería Python
+- Validación de diseño de API pública
+- Verificación de documentación y ejemplos
+- Auditoría de estructura de paquete
+
+#### 6. Backend Python Celery Skill (`[python-development/skills] backend-py-celery`)
+**Desarrollo de APIs y Tareas Celery**
+
+Skill ejecutable para desarrollo de rutas FastAPI y tareas programadas Celery con Clean Architecture.
+
+**Capacidades:**
+- Creación de endpoints FastAPI con dependency injection
+- Implementación de tareas Celery programadas
+- Generación de boilerplate para Clean Architecture
+- Integración con repositorios centralizados
+
+**Cuándo usar:**
+- Crear nuevas rutas de API REST
+- Implementar tareas programadas (cron jobs)
+- Generar estructura de Clean Architecture
+
+### Flutter Development Plugin
+
+Agentes especializados para desarrollo Flutter/Dart.
+
+#### 7. Reviewer Flutter App Agent (`[flutter-development/agents] reviewer-flutter-app`)
+**Code Review para Aplicaciones Flutter**
+
+Agente especializado en revisión de código Flutter, enfocado en widgets, state management y performance móvil.
+
+**Capacidades:**
+- Análisis de arquitectura de widgets
+- Validación de state management patterns
+- Optimización de performance
+- Best practices de Flutter/Dart
+
+**Cuándo usar:**
+- Code reviews automatizados de Flutter PRs
+- Validación de arquitectura de widgets
+- Verificación de performance
+- Auditoría de best practices móviles
 
 ## GitHub Workflows
 
@@ -244,16 +302,19 @@ sync-agents
 
 ### Método 4: Manual
 
-Copiar manualmente los agentes:
+Copiar manualmente los agentes desde la estructura de plugins:
 
 ```bash
 # Crear directorio de agentes
 mkdir -p .claude/agents
 
 # Copiar agentes deseados
-cp claude-agents/agents/architect.md .claude/agents/
-cp claude-agents/agents/backend-py.md .claude/agents/
-cp claude-agents/agents/qa-backend-py.md .claude/agents/
+cp claude-agents/plugins/general/agents/architect.md .claude/agents/
+cp claude-agents/plugins/python-development/agents/backend-py.md .claude/agents/
+cp claude-agents/plugins/python-development/agents/qa-backend-py.md .claude/agents/
+
+# Copiar skills
+cp claude-agents/plugins/python-development/skills/backend-py-celery.md .claude/agents/
 ```
 
 ## Uso del Script de Sincronización
@@ -309,28 +370,58 @@ claude-agents/
 ├── .gitignore
 ├── .github/
 │   └── workflows/
-│       └── validate-agents.yml    # CI para validar agentes
-├── .idea/                          # IntelliJ IDEA config
-├── README.md                       # Este archivo
-├── agents/                         # Agentes de Claude
-│   ├── architect.md               # Agente de arquitectura
-│   ├── backend-py.md              # Agente de backend Python
-│   ├── qa-backend-py.md           # Agente de QA/testing
-│   └── reviewer-backend-py.md     # Agente de code review
-├── docs/                           # Documentación
-│   ├── CI_CD_GUIDE_TO_CODE_REVIEW_AGENT.md  # Guía de CI/CD para code review
-│   ├── CODE_REVIEW_AGENT_ARCHITECTURE.md    # Arquitectura del code reviewer
+│       └── validate-agents.yml           # CI para validar agentes
+├── .idea/                                # IntelliJ IDEA config
+├── README.md                             # Este archivo
+├── plugins/                              # Sistema de plugins
+│   ├── README.md                         # Documentación del sistema de plugins
+│   ├── general/                          # Agentes agnósticos de lenguaje
+│   │   ├── README.md
+│   │   └── agents/
+│   │       └── architect.md             # Agente de arquitectura
+│   ├── python-development/              # Ecosistema Python
+│   │   ├── README.md
+│   │   ├── agents/
+│   │   │   ├── backend-py.md           # Agente de backend Python
+│   │   │   ├── qa-backend-py.md        # Agente de QA/testing
+│   │   │   ├── reviewer-backend-py.md  # Agente de code review
+│   │   │   └── reviewer-library-py.md  # Agente de review de librerías
+│   │   └── skills/
+│   │       └── backend-py-celery.md    # Skill FastAPI + Celery
+│   └── flutter-development/             # Ecosistema Flutter
+│       ├── README.md
+│       └── agents/
+│           └── reviewer-flutter-app.md  # Agente de review Flutter
+├── docs/                                 # Documentación
+│   ├── CI_CD_GUIDE_TO_CODE_REVIEW_AGENT.md  # Guía de CI/CD
+│   ├── CODE_REVIEW_AGENT_ARCHITECTURE.md    # Arquitectura del reviewer
 │   ├── QUICKSTART_TO_USE_AGENTS.md          # Inicio rápido
 │   └── TESTING_STRATEGY.md                  # Estrategia de testing
-├── git-workflows/                  # Workflows reutilizables
-│   ├── README.md                  # Documentación de workflows
-│   └── code-review-backend-py.yml # Workflow de code review
-└── scripts/                        # Scripts de utilidad
-    ├── sync-agents.sh             # Script de sincronización de agentes
-    ├── sync-workflows.sh          # Script de sincronización de workflows
-    ├── validate-agents.sh         # Script de validación de agentes
-    └── README.md                  # Documentación de scripts
+├── git-workflows/                        # Workflows reutilizables
+│   ├── README.md                        # Documentación de workflows
+│   ├── python/
+│   │   └── code-review-backend-py.yml  # Workflow de code review Python
+│   └── flutter/
+│       └── code-review-flutter-app.yml # Workflow de code review Flutter
+└── scripts/                              # Scripts de utilidad
+    ├── sync-agents.sh                   # Script de sincronización de agentes
+    ├── sync-workflows.sh                # Script de sincronización de workflows
+    ├── validate-agents.sh               # Script de validación de agentes
+    └── README.md                        # Documentación de scripts
 ```
+
+### Arquitectura de Plugins
+
+El proyecto usa una arquitectura de plugins que organiza agentes y skills por dominio tecnológico:
+
+- **`plugins/general/`**: Agentes agnósticos que funcionan en cualquier lenguaje
+- **`plugins/python-development/`**: Ecosistema completo Python (agentes + skills)
+- **`plugins/flutter-development/`**: Ecosistema Flutter (agentes + skills)
+
+Cada plugin contiene:
+- **`agents/`**: Archivos .md con instrucciones y personalidad de agentes
+- **`skills/`**: Archivos .md con capacidades ejecutables (herramientas + funciones)
+- **`README.md`**: Documentación específica del plugin
 
 ## Configuración para Equipos
 
@@ -381,7 +472,7 @@ Los agentes se invocan basándose en el contexto de tu solicitud. Por ejemplo:
 
 ### Estructura de un Agente
 
-Cada agente es un archivo Markdown con frontmatter YAML:
+Cada agente es un archivo Markdown con frontmatter YAML, organizado dentro de la estructura de plugins:
 
 ```markdown
 ---
@@ -403,7 +494,42 @@ Your agent prompt here...
 - `model`: Modelo a usar (`inherit`, `sonnet`, `opus`, `haiku`)
 - `color`: Color para la UI (`blue`, `green`, `yellow`, `red`, `purple`, `cyan`)
 
-### Ejemplo
+### Agregar un Nuevo Agente a un Plugin Existente
+
+```bash
+# 1. Crear el archivo del agente
+touch plugins/python-development/agents/nuevo-agente.md
+
+# 2. Agregar frontmatter y contenido
+# Ver ejemplo abajo
+
+# 3. Validar el agente
+./scripts/validate-agents.sh
+
+# 4. Actualizar README del plugin
+# Editar plugins/python-development/README.md
+```
+
+### Crear un Nuevo Plugin
+
+Para crear un nuevo plugin (ej: `javascript-development`):
+
+```bash
+# 1. Crear estructura
+mkdir -p plugins/javascript-development/agents
+mkdir -p plugins/javascript-development/skills
+
+# 2. Crear README del plugin
+touch plugins/javascript-development/README.md
+
+# 3. Agregar agentes
+touch plugins/javascript-development/agents/frontend-react.md
+
+# 4. Validar
+./scripts/validate-agents.sh
+```
+
+### Ejemplo de Agente
 
 ```markdown
 ---
@@ -417,6 +543,8 @@ color: cyan
 
 You are a specialized React frontend development agent...
 ```
+
+Ver [documentación de plugins](./plugins/README.md) para más detalles sobre convenciones y estructura.
 
 ## Contribuir
 

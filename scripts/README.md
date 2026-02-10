@@ -105,20 +105,27 @@ sync-company-agents
 
 ### 1. Listar Agentes Disponibles
 
-El script muestra todos los agentes disponibles con su descripción:
+El script muestra todos los agentes disponibles con su contexto de plugin y descripción:
 
 ```
 Agentes disponibles:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[1] architect
+[1] [general/agents] architect
     Software architecture specialist who analyzes, evaluates...
 
-[2] backend-py
+[2] [python-development/agents] backend-py
     Backend Python Development Agent specializing in Clean...
 
-[3] qa-backend-py
+[3] [python-development/agents] qa-backend-py
     QA Backend Python agent...
+
+[4] [python-development/skills] backend-py-celery
+    Skill for developing FastAPI routes and Celery tasks...
 ```
+
+El formato `[plugin/type]` indica:
+- El plugin al que pertenece (ej: `python-development`, `general`)
+- El tipo (ej: `agents` o `skills`)
 
 ### 2. Seleccionar Agentes
 
@@ -219,17 +226,36 @@ alias sync-company-agents="bash /ruta/sync-agents.sh https://github.com/empresa/
 
 ## Estructura de Agentes
 
-Los agentes deben seguir esta estructura en el repositorio:
+Los agentes siguen una arquitectura de plugins en el repositorio:
 
 ```
 claude-agents/
-├── agents/
-│   ├── architect.md
-│   ├── backend-py.md
-│   └── qa-backend-py.md
+├── plugins/
+│   ├── general/
+│   │   └── agents/
+│   │       └── architect.md
+│   ├── python-development/
+│   │   ├── agents/
+│   │   │   ├── backend-py.md
+│   │   │   └── qa-backend-py.md
+│   │   └── skills/
+│   │       └── backend-py-celery.md
+│   └── flutter-development/
+│       └── agents/
+│           └── reviewer-flutter-app.md
 └── scripts/
     └── sync-agents.sh
 ```
+
+### Descubrimiento Automático
+
+El script descubre agentes automáticamente:
+1. Escanea el directorio `plugins/`
+2. Busca archivos `.md` en subdirectorios `agents/` y `skills/`
+3. Excluye archivos `README.md`
+4. Muestra contexto de plugin: `[plugin-name/type] agent-name`
+
+### Formato de Agentes
 
 Cada archivo de agente debe tener un frontmatter YAML con al menos:
 
@@ -260,8 +286,9 @@ color: blue
 
 ### Error: "No se encontraron agentes disponibles"
 
-- Verifica que el repositorio tenga una carpeta `agents/`
-- Verifica que existan archivos `.md` en la carpeta
+- Verifica que el repositorio tenga una carpeta `plugins/`
+- Verifica que existan subdirectorios `agents/` o `skills/` dentro de los plugins
+- Verifica que existan archivos `.md` en esos subdirectorios
 
 ### Error al copiar agentes
 
@@ -272,10 +299,14 @@ color: blue
 
 Para agregar nuevos agentes al repositorio:
 
-1. Crea un archivo `.md` en la carpeta `agents/`
-2. Incluye el frontmatter YAML con `name`, `description`, `model`, y `color`
-3. Escribe la definición del agente
-4. Haz commit y push al repositorio
+1. Decide el plugin apropiado (ej: `python-development`, `general`)
+2. Crea un archivo `.md` en `plugins/[plugin-name]/agents/` o `plugins/[plugin-name]/skills/`
+3. Incluye el frontmatter YAML con `name`, `description`, `model`, y `color`
+4. Escribe la definición del agente
+5. Actualiza el README del plugin si es necesario
+6. Haz commit y push al repositorio
+
+Ver [documentación de plugins](../plugins/README.md) para más detalles.
 
 ## Licencia
 

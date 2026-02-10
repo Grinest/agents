@@ -11,7 +11,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-AGENTS_DIR="$(dirname "$SCRIPT_DIR")/agents"
+PLUGINS_DIR="$(dirname "$SCRIPT_DIR")/plugins"
 
 # Contadores
 TOTAL_TESTS=0
@@ -47,33 +47,33 @@ echo "║        Agent Validation Test Suite           ║"
 echo "╚═══════════════════════════════════════════════╝"
 echo -e "${NC}"
 
-# Validar que el directorio de agentes existe
-if [ ! -d "$AGENTS_DIR" ]; then
-    print_fail "Agents directory not found: $AGENTS_DIR"
+# Validar que el directorio de plugins existe
+if [ ! -d "$PLUGINS_DIR" ]; then
+    print_fail "Plugins directory not found: $PLUGINS_DIR"
     exit 1
 fi
 
-print_pass "Agents directory exists"
+print_pass "Plugins directory exists"
 
-# Contar archivos de agentes (incluyendo subdirectorios, excluyendo README)
-agent_count=$(find "$AGENTS_DIR" -name "*.md" -type f ! -name "README.md" | wc -l | xargs)
+# Contar archivos de agentes (solo en subdirectorios agents/ y skills/, excluyendo README)
+agent_count=$(find "$PLUGINS_DIR" -type f \( -path "*/agents/*.md" -o -path "*/skills/*.md" \) ! -name "README.md" | wc -l | xargs)
 
 if [ "$agent_count" -eq 0 ]; then
-    print_fail "No agent files found in $AGENTS_DIR"
+    print_fail "No agent files found in $PLUGINS_DIR"
     exit 1
 fi
 
 print_pass "Found $agent_count agent file(s)"
 echo ""
 
-# Validar cada archivo de agente (incluyendo subdirectorios, excluyendo README)
+# Validar cada archivo de agente (solo en agents/ y skills/, excluyendo README)
 while IFS= read -r -d '' agent_file; do
     if [ ! -f "$agent_file" ]; then
         continue
     fi
 
-    # Calcular ruta relativa desde AGENTS_DIR
-    rel_path="${agent_file#$AGENTS_DIR/}"
+    # Calcular ruta relativa desde PLUGINS_DIR
+    rel_path="${agent_file#$PLUGINS_DIR/}"
     agent_name="${rel_path%.md}"
     echo -e "${YELLOW}Testing agent: $agent_name${NC}"
     echo "────────────────────────────────────────────────"
@@ -201,7 +201,7 @@ while IFS= read -r -d '' agent_file; do
     fi
 
     echo ""
-done < <(find "$AGENTS_DIR" -name "*.md" -type f ! -name "README.md" -print0 | sort -z)
+done < <(find "$PLUGINS_DIR" -type f \( -path "*/agents/*.md" -o -path "*/skills/*.md" \) ! -name "README.md" -print0 | sort -z)
 
 # Resumen final
 echo -e "${BLUE}"

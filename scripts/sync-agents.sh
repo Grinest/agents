@@ -11,7 +11,7 @@ NC='\033[0m' # No Color
 # Configuración por defecto
 DEFAULT_AGENTS_REPO="https://github.com/juanpaconpa/claude-agents.git"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-AGENTS_SOURCE_DIR="$(dirname "$SCRIPT_DIR")/agents"
+PLUGINS_SOURCE_DIR="$(dirname "$SCRIPT_DIR")/plugins"
 PROJECT_AGENTS_DIR=".claude/agents"
 TEMP_REPO_DIR="/tmp/claude-agents-sync"
 
@@ -92,15 +92,15 @@ get_agent_description() {
 # Función para obtener agentes desde el directorio local o remoto
 get_agents_source() {
     # Si estamos en el repo de agentes, usar directorio local
-    if [ -d "$AGENTS_SOURCE_DIR" ] && [ -f "$AGENTS_SOURCE_DIR/../.git/config" ]; then
+    if [ -d "$PLUGINS_SOURCE_DIR" ] && [ -f "$PLUGINS_SOURCE_DIR/../.git/config" ]; then
         # Verificar si el repo local coincide con AGENTS_REPO
-        local current_remote=$(cd "$AGENTS_SOURCE_DIR/.." && git config --get remote.origin.url 2>/dev/null)
+        local current_remote=$(cd "$PLUGINS_SOURCE_DIR/.." && git config --get remote.origin.url 2>/dev/null)
 
         # Si usamos un repo personalizado diferente, clonar ese en su lugar
         if [ "$AGENTS_REPO" != "$DEFAULT_AGENTS_REPO" ] && [ "$current_remote" != "$AGENTS_REPO" ]; then
             print_info "Detectado repositorio personalizado, obteniendo desde remoto..."
         else
-            echo "$AGENTS_SOURCE_DIR"
+            echo "$PLUGINS_SOURCE_DIR"
             return 0
         fi
     fi
@@ -131,7 +131,7 @@ get_agents_source() {
         fi
     fi
 
-    echo "$TEMP_REPO_DIR/agents"
+    echo "$TEMP_REPO_DIR/plugins"
     return 0
 }
 
@@ -147,7 +147,7 @@ list_agents() {
     echo -e "${CYAN}Agentes disponibles:${NC}"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-    # Buscar en directorio raíz y subdirectorios
+    # Buscar en directorio raíz y subdirectorios (solo en agents/ y skills/)
     while IFS= read -r -d '' agent_file; do
         if [ -f "$agent_file" ]; then
             # Calcular ruta relativa desde source_dir
@@ -155,13 +155,13 @@ list_agents() {
             local agent_name="${rel_path%.md}"
             local agent_desc=$(get_agent_description "$agent_file")
 
-            # Mostrar con prefijo de directorio si está en subdirectorio
-            local display_name="$agent_name"
-            if [[ "$rel_path" == */* ]]; then
-                display_name="${BLUE}$(dirname "$rel_path")/${NC}${YELLOW}$(basename "$rel_path" .md)${NC}"
-            else
-                display_name="${YELLOW}$agent_name${NC}"
-            fi
+            # Extraer contexto del plugin (ej: python-development/agents)
+            local plugin_name=$(echo "$rel_path" | cut -d'/' -f1)
+            local type_dir=$(echo "$rel_path" | cut -d'/' -f2)
+            local file_name=$(basename "$rel_path" .md)
+
+            # Mostrar con contexto de plugin: [plugin/type] name
+            local display_name="${BLUE}[$plugin_name/$type_dir]${NC} ${YELLOW}$file_name${NC}"
 
             agents+=("$agent_name")
             agent_paths+=("$agent_file")
@@ -170,7 +170,7 @@ list_agents() {
             echo ""
             ((index++))
         fi
-    done < <(find "$source_dir" -name "*.md" -print0 | sort -z)
+    done < <(find "$source_dir" -type f \( -path "*/agents/*.md" -o -path "*/skills/*.md" \) ! -name "README.md" -print0 | sort -z)
 
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
