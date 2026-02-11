@@ -7,14 +7,9 @@
     "url": "https://github.com/Grinest"
   },
   "homepage": "https://github.com/Grinest/agents",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Grinest/agents.git"
-  },
-  "agents": [
-    "agents/reviewer-flutter-app.md"
-  ],
-  "tags": [
+  "repository": "https://github.com/Grinest/agents.git",
+  "agents": "./agents/",
+  "keywords": [
     "flutter",
     "dart",
     "mobile",

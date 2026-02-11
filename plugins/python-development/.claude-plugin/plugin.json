@@ -7,21 +7,10 @@
     "url": "https://github.com/Grinest"
   },
   "homepage": "https://github.com/Grinest/agents",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Grinest/agents.git"
-  },
-  "agents": [
-    "agents/backend-py.md",
-    "agents/qa-backend-py.md",
-    "agents/reviewer-backend-py.md",
-    "agents/reviewer-library-py.md"
-  ],
-  "skills": [
-    "skills/backend-py-celery.md",
-    "skills/backend-py-library.md"
-  ],
-  "tags": [
+  "repository": "https://github.com/Grinest/agents.git",
+  "agents": "./agents/",
+  "skills": "./skills/",
+  "keywords": [
     "python",
     "backend",
     "clean-architecture",
