@@ -1,24 +1,10 @@
 {
   "name": "python-development",
-  "description": "Python backend development agents and skills with Clean Architecture, FastAPI, and Celery",
   "version": "1.1.0",
+  "description": "Python backend development agents and skills with Clean Architecture, FastAPI, and Celery",
   "author": {
     "name": "Grinest",
     "url": "https://github.com/Grinest"
   },
-  "homepage": "https://github.com/Grinest/agents",
-  "repository": "https://github.com/Grinest/agents.git",
-  "agents": "./agents/",
-  "skills": "./skills/",
-  "keywords": [
-    "python",
-    "backend",
-    "clean-architecture",
-    "fastapi",
-    "celery",
-    "library",
-    "testing",
-    "code-review"
-  ],
   "license": "MIT"
 }
