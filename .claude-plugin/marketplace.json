@@ -9,21 +9,21 @@
   "plugins": [
     {
       "name": "general",
-      "path": "plugins/general",
+      "source": "./plugins/general",
       "description": "Language-agnostic agents for software architecture and system design",
       "version": "1.0.0",
       "tags": ["architecture", "design", "planning"]
     },
     {
       "name": "python-development",
-      "path": "plugins/python-development",
+      "source": "./plugins/python-development",
       "description": "Python backend development agents and skills with Clean Architecture, FastAPI, Celery, and library development",
       "version": "1.1.0",
       "tags": ["python", "backend", "clean-architecture", "fastapi", "celery", "library"]
     },
     {
       "name": "flutter-development",
-      "path": "plugins/flutter-development",
+      "source": "./plugins/flutter-development",
       "description": "Flutter and Dart development agents for mobile app code review",
       "version": "1.0.0",
       "tags": ["flutter", "dart", "mobile"]
