@@ -274,16 +274,16 @@ Instala los plugins que necesites:
 
 ```bash
 # Agentes generales (arquitectura)
-/plugin install general@agents
+/plugin install general@seven-samurai-agents
 
 # Desarrollo Python (backend, QA, review, skill Celery)
-/plugin install python-development@agents
+/plugin install python-development@seven-samurai-agents
 
 # Desarrollo Flutter (review)
-/plugin install flutter-development@agents
+/plugin install flutter-development@seven-samurai-agents
 
 # O instalar todo
-/plugin install general@agents python-development@agents flutter-development@agents
+/plugin install general@seven-samurai-agents python-development@seven-samurai-agents flutter-development@seven-samurai-agents
 ```
 
 #### 3. Verificar Instalación
@@ -293,7 +293,7 @@ Instala los plugins que necesites:
 /plugin list
 
 # Ver detalles de un plugin
-/plugin show python-development@agents
+/plugin show python-development@seven-samurai-agents
 ```
 
 ### Configuración para Equipos
@@ -304,9 +304,9 @@ Para que todo el equipo tenga los mismos plugins automáticamente, agrega a `.cl
 {
   "plugin_marketplaces": ["Grinest/agents"],
   "plugins": [
-    "general@agents",
-    "python-development@agents",
-    "flutter-development@agents"
+    "general@seven-samurai-agents",
+    "python-development@seven-samurai-agents",
+    "flutter-development@seven-samurai-agents"
   ]
 }
 ```
@@ -317,7 +317,7 @@ Los miembros del equipo solo necesitan clonar el proyecto - los plugins se insta
 
 ```bash
 # Ver todos los plugins del marketplace
-/plugin marketplace browse claude-agents
+/plugin marketplace browse seven-samurai-agents
 
 # Buscar por tecnología
 /plugin search python
@@ -328,10 +328,10 @@ Los miembros del equipo solo necesitan clonar el proyecto - los plugins se insta
 
 ```bash
 # Actualizar un plugin específico
-/plugin update python-development@agents
+/plugin update python-development@seven-samurai-agents
 
 # Actualizar todos los plugins del marketplace
-/plugin update --marketplace claude-agents
+/plugin update --marketplace seven-samurai-agents
 ```
 
 ### Método Alternativo: Instalación Manual
@@ -478,9 +478,9 @@ mkdir plugins/company-standards
 {
   "plugin_marketplaces": ["tu-empresa/claude-agents"],
   "plugins": [
-    "general@agents",
-    "python-development@agents",
-    "company-standards@agents"
+    "general@seven-samurai-agents",
+    "python-development@seven-samurai-agents",
+    "company-standards@seven-samurai-agents"
   ]
 }
 ```
@@ -505,7 +505,7 @@ Combina este marketplace público con plugins privados de tu empresa:
     "tu-empresa/private-agents"         // Privado
   ],
   "plugins": [
-    "python-development@agents",  // Del público
+    "python-development@seven-samurai-agents",  // Del público
     "company-standards@private-agents"   // Del privado
   ]
 }
@@ -638,7 +638,7 @@ Si encuentras problemas:
 ```bash
 # 1. Agregar marketplace y instalar plugins
 /plugin marketplace add Grinest/agents
-/plugin install general@agents python-development@agents
+/plugin install general@seven-samurai-agents python-development@seven-samurai-agents
 
 # 2. Usar el agente de arquitectura
 "Analiza este proyecto y recomienda la mejor forma de implementar un sistema de autenticación"
@@ -665,7 +665,7 @@ cd claude-agents
 # En cada proyecto: .claude/settings.json
 {
   "plugin_marketplaces": ["empresa/claude-agents"],
-  "plugins": ["python-development@agents"]
+  "plugins": ["python-development@seven-samurai-agents"]
 }
 
 # 4. Los agentes personalizados están disponibles automáticamente
@@ -677,13 +677,13 @@ cd claude-agents
 # Cliente A - Configuración en .claude/settings.json del proyecto
 {
   "plugin_marketplaces": ["cliente-a/agents"],
-  "plugins": ["python-development@agents"]
+  "plugins": ["python-development@seven-samurai-agents"]
 }
 
 # Cliente B - Configuración en .claude/settings.json del proyecto
 {
   "plugin_marketplaces": ["cliente-b/agents"],
-  "plugins": ["javascript-development@agents"]
+  "plugins": ["javascript-development@seven-samurai-agents"]
 }
 
 # Cambiar entre proyectos automáticamente
@@ -698,13 +698,13 @@ Los plugins se pueden actualizar fácilmente:
 
 ```bash
 # Actualizar un plugin específico
-/plugin update python-development@agents
+/plugin update python-development@seven-samurai-agents
 
 # Actualizar todos los plugins de un marketplace
-/plugin update --marketplace claude-agents
+/plugin update --marketplace seven-samurai-agents
 
 # Ver versiones disponibles
-/plugin show python-development@agents
+/plugin show python-development@seven-samurai-agents
 ```
 
 ### Auto-updates (Opcional)
@@ -737,8 +737,8 @@ Configura auto-updates para mantener plugins actualizados automáticamente:
 /plugin marketplace list
 
 # Reinstalar plugin
-/plugin uninstall python-development@agents
-/plugin install python-development@agents
+/plugin uninstall python-development@seven-samurai-agents
+/plugin install python-development@seven-samurai-agents
 ```
 
 ### Error al agregar marketplace
