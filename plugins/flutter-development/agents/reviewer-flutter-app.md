@@ -323,14 +323,75 @@ Future<Result<StartChargingResponseDto>> startCharging(
 
 ### 3. PROJECT UI LIBRARY & INTERNATIONALIZATION (Score: X/10)
 
-> **Convention:** The project should have a centralized UI library (e.g., `{Project}UI`) that wraps a design system or component library. All UI components should go through this wrapper. Below, `{Project}` represents the project name prefix (e.g., `Voltop`, `Acme`, etc.). Look for the centralized UI file in `lib/common/ui/` to identify the project's naming convention.
+> **Convention:** Every project MUST use `flutter_components_library` ([Voltop Flutter Components Library](https://github.com/Voltop-SAS/flutter-components-library)) as the **base component library**. However, **no feature or screen should import this library directly**. Instead, each project MUST create its own centralized UI wrapper components (e.g., `{Project}Button`, `{Project}Text`, etc.) that internally use `flutter_components_library`. This ensures visual consistency, makes it easy to customize the design system per project, and allows swapping the underlying library without touching feature code.
+>
+> Below, `{Project}` represents the project name prefix (e.g., `Voltop`, `Acme`, etc.). Look for the centralized UI file in `lib/common/ui/` to identify the project's naming convention.
 
 #### ✅ MUST FOLLOW:
 
-**A. Centralized UI Components (MANDATORY)**
+**A. Component Library Architecture (MANDATORY)**
+
+The component architecture follows a **3-layer pattern**:
+
+1. **Base Library** (`flutter_components_library`) — Provides generic, reusable UI components (buttons, text, text fields, snackbars, bottom sheets, etc.). Added as a dependency in `pubspec.yaml`.
+2. **Project Wrappers** (`lib/common/ui/{project}_ui.dart`) — Each project creates its own wrapper components (`{Project}Button`, `{Project}Text`, `{Project}TextField`, etc.) that internally import and configure `flutter_components_library` with project-specific styles, colors, and defaults.
+3. **Feature UI** (`lib/features/*/presentation/`) — Screens and widgets ONLY import the project wrappers. They NEVER import `flutter_components_library` directly.
+
+```
+┌─────────────────────────────────────────────────────┐
+│  Feature Screens & Widgets (presentation/)          │
+│  → ONLY imports: {project}_ui.dart                  │
+├─────────────────────────────────────────────────────┤
+│  Project Wrappers (lib/common/ui/{project}_ui.dart) │
+│  → Imports: flutter_components_library              │
+│  → Exports: {Project}Button, {Project}Text, etc.    │
+├─────────────────────────────────────────────────────┤
+│  flutter_components_library (base package)           │
+│  → github.com/Voltop-SAS/flutter-components-library │
+└─────────────────────────────────────────────────────┘
+```
+
+**Review Checklist:**
+- [ ] `flutter_components_library` is listed in `pubspec.yaml` dependencies
+- [ ] Project wrapper file exists at `lib/common/ui/{project}_ui.dart` (or equivalent barrel file)
+- [ ] Project wrapper file imports `flutter_components_library` and re-exports customized components
+- [ ] Custom project components (`{Project}Button`, `{Project}Text`, etc.) wrap and configure the base library components with project-specific theming
+- [ ] Feature/screen code NEVER imports `flutter_components_library` directly — only the project wrapper
+- [ ] When the base library adds new components, the project creates corresponding wrappers before using them
+
+```dart
+// ✅ CORRECT — Project wrapper file (lib/common/ui/acme_ui.dart)
+import 'package:flutter_components_library/flutter_components_library.dart';
+
+class AcmeButton {
+  static Widget primary({required String text, required VoidCallback onPressed}) {
+    return ComponentsButton.primary(
+      text: text,
+      onPressed: onPressed,
+      // Project-specific customization
+      borderRadius: 12,
+      textStyle: AcmeTextStyles.button,
+    );
+  }
+}
+
+// ✅ CORRECT — Feature screen imports project wrapper
+import 'package:acme_app/common/ui/acme_ui.dart';
+
+AcmeButton.primary(text: 'continue_button'.i18n, onPressed: () {})
+
+// ❌ INCORRECT — Feature screen imports base library directly
+import 'package:flutter_components_library/flutter_components_library.dart';
+ComponentsButton.primary(text: 'Continue', onPressed: () {})  // Bypasses project wrapper!
+
+// ❌ INCORRECT — No project wrappers exist; using base library everywhere
+// (Each project MUST create its own {Project}* components)
+```
+
+**B. Centralized UI Components (MANDATORY)**
 - [ ] All UI elements use the project's centralized UI components (`{Project}Button`, `{Project}Text`, `{Project}TextField`, `{Project}Snackbar`, `{Project}BottomSheet`)
 - [ ] NO raw Flutter widgets when a project UI equivalent exists (`Text` → `{Project}Text`, `ElevatedButton` → `{Project}Button.primary`, `TextField` → `{Project}TextField`, `SnackBar` → `{Project}Snackbar`, `showModalBottomSheet` → `{Project}BottomSheet.show`)
-- [ ] NO direct imports of the underlying component library — always use the project's UI wrappers (e.g., `{project}_ui.dart`)
+- [ ] NO direct imports of `flutter_components_library` in feature code — always use the project's UI wrappers (e.g., `{project}_ui.dart`)
 - [ ] `{Project}BottomSheet.show()` used instead of raw `showModalBottomSheet()` (the wrapper already provides `isScrollControlled: true`, `backgroundColor: Colors.transparent`, `useSafeArea: true`)
 - [ ] `{Project}Snackbar` used instead of `ScaffoldMessenger.showSnackBar`
 - [ ] Check `lib/common/ui/{project}_ui.dart` before implementing any new UI element
@@ -350,7 +411,7 @@ TextField(controller: controller)
 ScaffoldMessenger.of(context).showSnackBar(SnackBar(...))
 showModalBottomSheet(context: context, builder: ...)
 
-// ❌ INCORRECT - Direct import of underlying component library
+// ❌ INCORRECT - Direct import of base component library in feature code
 import 'package:flutter_components_library/flutter_components_library.dart';
 ComponentsText.heading('Title')  // Use {Project}Text instead
 ```
@@ -410,8 +471,10 @@ color: Colors.blue         // Flutter Colors
 
 #### ❌ UI/i18n VIOLATIONS:
 
+- **No project wrapper components exist** (CRITICAL — project MUST create `{Project}Button`, `{Project}Text`, etc. wrapping `flutter_components_library`)
+- **`flutter_components_library` not in `pubspec.yaml`** (CRITICAL — must use Voltop's base component library)
+- **Direct `flutter_components_library` import in feature code** (CRITICAL — features must use project UI wrappers, only `lib/common/ui/` may import the base library)
 - **Raw `Text()` widget** when `{Project}Text` exists (CRITICAL)
-- **Direct underlying library import** (CRITICAL — must use project UI wrappers)
 - **Hardcoded user-facing strings** without `.i18n` (CRITICAL)
 - **Hardcoded colors** instead of `{Project}Colors.*` (HIGH)
 - **Missing translations** in any supported language file (HIGH)
@@ -419,11 +482,12 @@ color: Colors.blue         // Flutter Colors
 - **`ScaffoldMessenger` instead of `{Project}Snackbar`** (MEDIUM)
 
 **UI/i18n Score Guidelines:**
-- **10/10**: All project UI used, all strings translated in all supported languages, no hardcoded colors
+- **10/10**: `flutter_components_library` used as base, all project wrappers exist, all strings translated, no hardcoded colors
 - **8-9/10**: 1-2 minor violations (e.g., missing translation in one language)
 - **6-7/10**: Multiple violations (raw Text widgets, some hardcoded strings)
-- **4-5/10**: Significant violations (widespread hardcoded strings, direct library imports)
-- **0-3/10**: No project UI usage, fully hardcoded strings
+- **4-5/10**: Significant violations (widespread hardcoded strings, direct base library imports in features)
+- **2-3/10**: No project UI wrappers exist (using base library directly everywhere)
+- **0-1/10**: No component library usage, fully hardcoded strings, no design system
 
 ---
 
@@ -730,19 +794,26 @@ setUpAll(() {
 
 ### Step 3: UI Library & Internationalization Check
 
-1. **Identify the project's centralized UI library**
-   - Look for `lib/common/ui/{project}_ui.dart`
-   - Identify the naming convention (`{Project}Text`, `{Project}Button`, etc.)
+1. **Verify base component library setup**
+   - Check `pubspec.yaml` for `flutter_components_library` dependency (from [Voltop Flutter Components Library](https://github.com/Voltop-SAS/flutter-components-library))
+   - If missing: flag as CRITICAL — every project must use this as the base component library
 
-2. **Scan for raw Flutter widget usage**
+2. **Verify project wrapper components exist**
+   - Look for `lib/common/ui/{project}_ui.dart` (or equivalent barrel file)
+   - Identify the naming convention (`{Project}Text`, `{Project}Button`, etc.)
+   - Verify wrappers import `flutter_components_library` and customize/re-export components
+   - If no wrapper exists: flag as CRITICAL — project must create custom wrappers, not use the base library directly
+
+3. **Scan for raw Flutter widget usage**
    - Search for `Text(` where `{Project}Text` should be used
    - Search for `ElevatedButton(`, `TextButton(`, `OutlinedButton(` where `{Project}Button` should be used
    - Search for `TextField(` where `{Project}TextField` should be used
    - Search for `showModalBottomSheet(` where `{Project}BottomSheet.show()` should be used
    - Search for `ScaffoldMessenger` where `{Project}Snackbar` should be used
 
-3. **Scan for direct underlying library imports**
-   - Search for imports of the underlying component library (e.g., `flutter_components_library`)
+4. **Scan for direct base library imports in feature code**
+   - Search for `import 'package:flutter_components_library` in files outside `lib/common/ui/`
+   - Only `lib/common/ui/` files should import the base library; all other code must use project wrappers
 
 4. **Scan for hardcoded strings**
    - Search for string literals in UI code that are NOT using `.i18n`
@@ -1202,8 +1273,10 @@ When reviewing, verify every changed file against this checklist:
 - [ ] All dependencies injected via constructor (no direct `getIt` in BLoCs)
 - [ ] All user-facing strings use `.i18n` translations
 - [ ] All colors use `{Project}Colors.*`
+- [ ] `flutter_components_library` is in `pubspec.yaml` as base component library
+- [ ] Project wrapper components exist in `lib/common/ui/` (wrapping `flutter_components_library`)
 - [ ] All UI elements use project UI components (no raw Flutter widgets for Text, Button, TextField, Snackbar, BottomSheet)
-- [ ] No direct imports of underlying component library
+- [ ] No direct imports of `flutter_components_library` in feature code (only in `lib/common/ui/`)
 - [ ] All API methods return `Result<T>`
 - [ ] All DTOs use Freezed + json_serializable
 - [ ] BLoC events and states use Freezed (NOT Equatable)
