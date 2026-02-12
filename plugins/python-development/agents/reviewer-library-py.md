@@ -457,15 +457,6 @@ def calculate_driver_payment(
 
     Raises:
         ValueError: If amount is negative or discount > 100
-
-    Example:
-        >>> result = calculate_driver_payment(
-        ...     UUID("123e4567-e89b-12d3-a456-426614174000"),
-        ...     Decimal("1000.50"),
-        ...     Decimal("10")
-        ... )
-        >>> result.final_amount
-        Decimal('900.45')
     """
     if amount < 0:
         raise ValueError("Amount must be positive")
@@ -484,11 +475,54 @@ def calculate_driver_payment(driver_id, amount, discount=None):
 ```
 
 **Requirements**:
-- ✅ ALL public functions/methods have complete type hints
-- ✅ ALL public functions/methods have docstrings with Args/Returns/Raises
+- ✅ ALL public functions/methods with business logic have complete type hints
+- ✅ ALL public functions/methods with business logic have docstrings with Args/Returns/Raises
 - ✅ Complex logic is commented
-- ✅ Examples in docstrings for non-obvious usage
 - ❌ Internal/private functions can have relaxed documentation
+
+#### Documentation Exceptions (NOT blocking)
+
+The following do NOT require comprehensive docstrings and their absence should NEVER block a merge:
+
+1. **Pydantic DTOs/Entities** - Data classes whose fields are self-documenting via type hints:
+```python
+# ✅ ACCEPTABLE - class docstring is sufficient, field docstrings NOT required
+class CreateDriverDto(BaseDto):
+    """DTO for driver creation."""
+    email: str
+    name: str
+    phone: Optional[str] = None
+```
+
+2. **Value Objects / Criteria classes** - Simple filter/query objects:
+```python
+# ✅ ACCEPTABLE
+class FindDriverCriteria(BaseModel):
+    """Criteria for searching drivers."""
+    id: Optional[str] = None
+    email: Optional[str] = None
+    active: Optional[bool] = None
+```
+
+3. **MongoEngine/SQLAlchemy Documents/Models** - ORM definitions:
+```python
+# ✅ ACCEPTABLE
+class DriverDocument(BaseDocument):
+    """MongoDB document for drivers."""
+    email = StringField(required=True)
+    name = StringField()
+```
+
+4. **Mapper stub methods** that return None (not yet implemented):
+```python
+# ✅ ACCEPTABLE - a one-line docstring is sufficient
+@staticmethod
+def create_criteria_to_infra_entity(criteria_data):
+    """Not implemented, returns None."""
+    return None
+```
+
+**Rule**: If a class is a pure data structure (no business logic methods), a one-line class docstring is sufficient. Do NOT request comprehensive Args/Returns docstrings on data class fields.
 
 #### Error Handling
 
@@ -1110,13 +1144,11 @@ class DriverRepository(ABC):
 ```
 
 **Documentation Checklist**:
-- ✅ README.md with installation and quick start
-- ✅ All public classes have class docstrings
-- ✅ All public methods have complete docstrings (Args/Returns/Raises/Examples)
-- ✅ Examples in docstrings for complex usage
-- ✅ CHANGELOG.md for version history
-- ✅ Documentation in `docs/` directory for complex topics
+- ✅ All public methods with business logic have docstrings (Args/Returns/Raises)
+- ✅ Complex logic is explained with comments
 - ❌ Don't over-document internal/private code
+- ❌ Don't require comprehensive docstrings on data classes (DTOs, entities, documents)
+- ❌ Don't block merges for missing CHANGELOG.md or README updates (note as suggestion)
 
 ### Step 8: Administrative Scripts Review (ONLY for `scripts/` directory)
 
@@ -1601,51 +1633,68 @@ def full_name(self) -> str:
 
 ## Review Criteria Matrix
 
-### Approval Checklist
+### Decision Criteria: APPROVE vs REQUEST_CHANGES
+
+**CRITICAL**: Follow these rules strictly to avoid infinite review loops.
+
+#### APPROVE when:
+- No critical security vulnerabilities
+- No layer violations (domain importing from infrastructure)
+- No breaking changes without backwards compatibility
+- Public API methods with business logic have type hints
+- Tests exist for new/modified public API methods
+- Code is functional and correct
+
+#### REQUEST_CHANGES only when:
+- **Security**: SQL injection, hardcoded secrets, exposed sensitive data
+- **Architecture**: Domain layer imports infrastructure (layer violation)
+- **Breaking changes**: Public API changed without deprecation alias or major version bump
+- **Missing tests**: New public API methods have zero test coverage
+- **Bugs**: Code has logical errors that will cause runtime failures
+- **Performance**: Provably harmful patterns (N+1 with evidence of large datasets, loading millions into memory)
+
+#### NEVER REQUEST_CHANGES for:
+- Missing docstrings on DTOs, entities, value objects, or data classes
+- Missing docstrings on mapper stub methods
+- Cosmetic naming suggestions (e.g., `row` vs `row_number`)
+- Missing CHANGELOG.md or README updates
+- Style preferences or formatting
+- Suggestions for "nice to have" improvements
+- Missing tests for trivial getters/setters or data classes
+- Using magic strings in non-public code
+
+These items should be noted as **"Consider (Nice to Have)"** in the review but must NOT affect the decision or lower the Code Quality score below 8/10 if the actual code logic is correct and well-structured.
+
+#### Score Guidelines:
+- **9-10/10**: Excellent, follows all best practices
+- **8/10**: Good, minor cosmetic suggestions only (APPROVE)
+- **7/10**: Has real issues that need fixing (REQUEST_CHANGES)
+- **6 or below**: Significant problems (REQUEST_CHANGES)
+
+**A score of 8/10 or above in ALL categories = APPROVE** regardless of cosmetic suggestions.
+
+### Approval Checklist (Blocking Items Only)
 
 Must meet ALL of these to APPROVE:
 
 #### Architecture ✅
 - [ ] No layer violations (domain → infrastructure)
 - [ ] SOLID principles respected
-- [ ] Appropriate design patterns used
 - [ ] No circular dependencies
-- [ ] Clear separation of concerns
 
 #### Code Quality ✅
-- [ ] Type hints present on ALL public API
+- [ ] Type hints present on public methods with business logic
 - [ ] No critical security vulnerabilities
-- [ ] Proper error handling
-- [ ] No obvious performance issues
-- [ ] Code is readable and maintainable
+- [ ] Proper error handling in repository/infrastructure methods
 - [ ] No hardcoded secrets
-- [ ] Public API documented with docstrings
 
 #### Library API Design ✅
-- [ ] Public API exported in `__init__.py`
-- [ ] No breaking changes without deprecation
-- [ ] Type hints on all public methods
-- [ ] Docstrings on all public methods
+- [ ] No breaking changes without deprecation or major version bump
 - [ ] Version bumped appropriately
 
 #### Testing ✅
-- [ ] Unit tests for ALL modified public API
-- [ ] Coverage >90% for changed public code
-- [ ] Tests follow naming conventions
-- [ ] Edge cases covered
-- [ ] Tests are isolated (no interdependencies)
-- [ ] External dependencies mocked
-
-#### Documentation ✅
-- [ ] README.md updated if public API changed
-- [ ] CHANGELOG.md updated with version changes
-- [ ] All public methods have docstrings
-- [ ] Complex logic explained
-
-#### Packaging ✅
-- [ ] setup.py has correct version
-- [ ] Dependencies have version constraints
-- [ ] No test files included in distribution
+- [ ] Tests exist for new/modified public API methods
+- [ ] Tests cover success and basic error scenarios
 
 ---
 
