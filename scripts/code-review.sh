@@ -367,11 +367,11 @@ EOF
 
   echo "${REVIEW_CONTENT}" > claude_review.md
 
-  # Determine decision
-  if echo "${REVIEW_CONTENT}" | grep -q "APPROVE"; then
-    DECISION="APPROVE"
-  elif echo "${REVIEW_CONTENT}" | grep -q "REQUEST_CHANGES\|REQUEST CHANGES"; then
+  # Determine decision (check REQUEST_CHANGES first since "APPROVE" appears inside it)
+  if echo "${REVIEW_CONTENT}" | grep -qE "REQUEST_CHANGES|REQUEST CHANGES"; then
     DECISION="REQUEST_CHANGES"
+  elif echo "${REVIEW_CONTENT}" | grep -q "APPROVE"; then
+    DECISION="APPROVE"
   else
     DECISION="COMMENT"
   fi
@@ -585,6 +585,11 @@ quality_gate() {
     BLOCKING_ISSUES+=("Testing: ${TEST_SCORE}/10 (required: >= ${TEST_THRESHOLD}/10)")
   fi
 
+  # Check reviewer decision
+  if [[ "${DECISION}" = "REQUEST_CHANGES" ]]; then
+    BLOCKING_ISSUES+=("Decision: REQUEST_CHANGES - Reviewer requested changes before merge")
+  fi
+
   if [[ ${#BLOCKING_ISSUES[@]} -gt 0 ]]; then
     echo "::error::PR does not meet quality standards for merge"
     echo ""
@@ -599,11 +604,13 @@ quality_gate() {
     echo "  Architecture: ${ARCH_SCORE}/10"
     echo "  Code Quality: ${QUALITY_SCORE}/10"
     echo "  Testing: ${TEST_SCORE}/10"
+    echo "  Decision: ${DECISION}"
     echo ""
     echo "Required Metrics:"
     echo "  Architecture: >= ${ARCH_THRESHOLD}/10"
     echo "  Code Quality: >= ${QUALITY_THRESHOLD}/10"
     echo "  Testing: >= ${TEST_THRESHOLD}/10"
+    echo "  Decision: APPROVE"
     exit 1
   fi
 
@@ -611,6 +618,7 @@ quality_gate() {
   echo "  Architecture: ${ARCH_SCORE}/10 (required: >= ${ARCH_THRESHOLD}/10)"
   echo "  Code Quality: ${QUALITY_SCORE}/10 (required: >= ${QUALITY_THRESHOLD}/10)"
   echo "  Testing: ${TEST_SCORE}/10 (required: >= ${TEST_THRESHOLD}/10)"
+  echo "  Decision: ${DECISION}"
 }
 
 # =============================================================================
