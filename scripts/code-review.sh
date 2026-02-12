@@ -36,7 +36,9 @@ MODEL="claude-opus-4-20250514"
 ARCH_THRESHOLD=7
 QUALITY_THRESHOLD=7
 TEST_THRESHOLD=8
-MAX_DIFF_SIZE=150000  # ~50K tokens
+MAX_DIFF_SIZE=300000  # ~75K tokens - Claude Opus 200K context allows larger diffs
+MAX_OUTPUT_TOKENS=8192  # Allow exhaustive reviews with all issues listed
+MAX_FILES=50  # Maximum number of changed files allowed for review
 
 # =============================================================================
 # Parse arguments
@@ -61,6 +63,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --test-threshold)
       TEST_THRESHOLD="$2"
+      shift 2
+      ;;
+    --max-files)
+      MAX_FILES="$2"
       shift 2
       ;;
     *)
@@ -101,6 +107,8 @@ validate_inputs() {
   echo "  Agent: ${AGENT_FILE}"
   echo "  Model: ${MODEL}"
   echo "  Thresholds: Arch>=${ARCH_THRESHOLD}, Quality>=${QUALITY_THRESHOLD}, Test>=${TEST_THRESHOLD}"
+  echo "  Max files: ${MAX_FILES}"
+  echo "  Max output tokens: ${MAX_OUTPUT_TOKENS}"
   echo "  Repository: ${REPOSITORY}"
   echo "  PR #${PR_NUMBER}: ${PR_TITLE}"
 }
@@ -166,6 +174,16 @@ get_changes() {
     | tee changed_files.txt || true
 
   CHANGED_COUNT=$(wc -l < changed_files.txt | tr -d ' ')
+
+  # Validate max files limit
+  if [[ ${CHANGED_COUNT} -gt ${MAX_FILES} ]]; then
+    echo "::error::PR has ${CHANGED_COUNT} changed Python files, exceeding the maximum of ${MAX_FILES}."
+    echo ""
+    echo "The code review cannot process more than ${MAX_FILES} files reliably."
+    echo "Please split this PR into smaller, focused pull requests."
+    exit 1
+  fi
+
   LINES_ADDED=$(git diff --numstat "origin/${BASE_REF}...HEAD" | awk '{sum+=$1} END {print sum+0}')
   LINES_DELETED=$(git diff --numstat "origin/${BASE_REF}...HEAD" | awk '{sum+=$2} END {print sum+0}')
 
@@ -337,9 +355,10 @@ EOF
     --rawfile system "${AGENT_FILE}" \
     --rawfile prompt user_prompt.txt \
     --arg model "${MODEL}" \
+    --argjson max_tokens "${MAX_OUTPUT_TOKENS}" \
     '{
       "model": $model,
-      "max_tokens": 4096,
+      "max_tokens": $max_tokens,
       "system": $system,
       "messages": [
         {
