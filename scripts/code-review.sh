@@ -121,7 +121,7 @@ get_previous_reviews() {
   echo "=== Step 1: Getting previous reviews ==="
 
   gh api "repos/${REPOSITORY}/issues/${PR_NUMBER}/comments" \
-    --jq '.[] | select(.user.login == "github-actions[bot]") | select(.body | contains("AI Code Review"))' \
+    --jq '.[] | select(.body | contains("AI Code Review by Claude"))' \
     > previous_reviews.json || true
 
   REVIEW_COUNT=$(jq -s 'length' previous_reviews.json)
