@@ -133,20 +133,20 @@ get_previous_reviews() {
     LAST_REVIEW_DATE=$(jq -r '.created_at' last_review.json)
     REVIEW_BODY=$(jq -r '.body' last_review.json)
 
-    # Extract previous scores
-    LAST_ARCH=$(echo "${REVIEW_BODY}" | grep -oP 'Architecture Score\*\*:\s*\K\d+(?=/10)' | head -1 || echo "N/A")
-    LAST_QUALITY=$(echo "${REVIEW_BODY}" | grep -oP 'Code Quality Score\*\*:\s*\K\d+(?=/10)' | head -1 || echo "N/A")
-    LAST_TEST=$(echo "${REVIEW_BODY}" | grep -oP 'Testing Score\*\*:\s*\K\d+(?=/10)' | head -1 || echo "N/A")
+    # Extract previous scores from section headers (format: "Architecture (Score: X/10)")
+    LAST_ARCH=$(echo "${REVIEW_BODY}" | grep -oP 'Architecture \(Score: \K\d+(?=/10\))' | head -1 || echo "N/A")
+    LAST_QUALITY=$(echo "${REVIEW_BODY}" | grep -oP 'Code Quality \(Score: \K\d+(?=/10\))' | head -1 || echo "N/A")
+    LAST_TEST=$(echo "${REVIEW_BODY}" | grep -oP 'Testing \(Score: \K\d+(?=/10\))' | head -1 || echo "N/A")
 
-    # Try alternative format
+    # Fallback: try details/summary format (format: "**Architecture**: X/10")
     if [[ "${LAST_ARCH}" = "N/A" ]]; then
-      LAST_ARCH=$(echo "${REVIEW_BODY}" | grep -oP 'Architecture.*?[Ss]core.*?:\s*\K\d+(?=/10)' | head -1 || echo "N/A")
+      LAST_ARCH=$(echo "${REVIEW_BODY}" | grep -oP '\*\*Architecture\*\*:\s*\K\d+(?=/10)' | head -1 || echo "N/A")
     fi
     if [[ "${LAST_QUALITY}" = "N/A" ]]; then
-      LAST_QUALITY=$(echo "${REVIEW_BODY}" | grep -oP 'Code Quality.*?[Ss]core.*?:\s*\K\d+(?=/10)' | head -1 || echo "N/A")
+      LAST_QUALITY=$(echo "${REVIEW_BODY}" | grep -oP '\*\*Code Quality\*\*:\s*\K\d+(?=/10)' | head -1 || echo "N/A")
     fi
     if [[ "${LAST_TEST}" = "N/A" ]]; then
-      LAST_TEST=$(echo "${REVIEW_BODY}" | grep -oP 'Testing.*?[Ss]core.*?:\s*\K\d+(?=/10)' | head -1 || echo "N/A")
+      LAST_TEST=$(echo "${REVIEW_BODY}" | grep -oP '\*\*Testing\*\*:\s*\K\d+(?=/10)' | head -1 || echo "N/A")
     fi
 
     echo "Previous metrics: Arch=${LAST_ARCH}, Quality=${LAST_QUALITY}, Testing=${LAST_TEST}"
@@ -395,10 +395,10 @@ EOF
     DECISION="COMMENT"
   fi
 
-  # Extract scores
-  ARCH_SCORE=$(echo "${REVIEW_CONTENT}" | grep -oP "Architecture.*?(\d+)/10" | grep -oP "\d+" | head -1 || echo "N/A")
-  QUALITY_SCORE=$(echo "${REVIEW_CONTENT}" | grep -oP "Code Quality.*?(\d+)/10" | grep -oP "\d+" | head -1 || echo "N/A")
-  TEST_SCORE=$(echo "${REVIEW_CONTENT}" | grep -oP "Testing.*?(\d+)/10" | grep -oP "\d+" | head -1 || echo "N/A")
+  # Extract scores from section headers (format: "Architecture (Score: X/10)")
+  ARCH_SCORE=$(echo "${REVIEW_CONTENT}" | grep -oP 'Architecture \(Score: \K\d+(?=/10\))' | head -1 || echo "N/A")
+  QUALITY_SCORE=$(echo "${REVIEW_CONTENT}" | grep -oP 'Code Quality \(Score: \K\d+(?=/10\))' | head -1 || echo "N/A")
+  TEST_SCORE=$(echo "${REVIEW_CONTENT}" | grep -oP 'Testing \(Score: \K\d+(?=/10\))' | head -1 || echo "N/A")
 
   echo "Decision: ${DECISION}"
   echo "Scores: Arch=${ARCH_SCORE}, Quality=${QUALITY_SCORE}, Testing=${TEST_SCORE}"
