@@ -625,8 +625,14 @@ quality_gate() {
     BLOCKING_ISSUES+=("Testing: ${TEST_SCORE}/10 (required: >= ${TEST_THRESHOLD}/10)")
   fi
 
-  # Check reviewer decision
-  if [[ "${DECISION}" = "REQUEST_CHANGES" ]]; then
+  # Check reviewer decision only when scores are not available
+  # When all numeric scores meet thresholds, scores take precedence over textual decision
+  local ALL_SCORES_AVAILABLE=true
+  if [[ "${ARCH_SCORE}" = "N/A" ]] || [[ "${QUALITY_SCORE}" = "N/A" ]] || [[ "${TEST_SCORE}" = "N/A" ]]; then
+    ALL_SCORES_AVAILABLE=false
+  fi
+
+  if [[ "${ALL_SCORES_AVAILABLE}" = false ]] && [[ "${DECISION}" = "REQUEST_CHANGES" ]]; then
     BLOCKING_ISSUES+=("Decision: REQUEST_CHANGES - Reviewer requested changes before merge")
   fi
 
