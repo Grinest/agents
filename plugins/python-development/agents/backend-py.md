@@ -62,10 +62,10 @@ All business logic is implemented through Interactors that follow this structure
 
 ```python
 class SomeInteractor(BaseInteractor):
-    def __init__(self, repository: Repository, translate: TranslateService, logger: LoggerService):
+    def __init__(self, repository: SomeRepository, file_storage: FileStorageService, logger: LoggerService):
         BaseInteractor.__init__(self)
-        self.repository = repository
-        self.translate = translate
+        self.repository = repository        # Domain interface (ABC), NOT concrete implementation
+        self.file_storage = file_storage    # Domain interface (ABC), NOT concrete implementation
         self.logger = logger
 
     def validate(self, input_dto: SomeDto) -> bool | OutputErrorContext:
@@ -78,6 +78,8 @@ class SomeInteractor(BaseInteractor):
         # Return OutputSuccessContext on success, OutputErrorContext on error
         pass
 ```
+
+**Critical Rule**: All constructor type hints in interactors MUST use **domain abstractions** (ABC interfaces), NEVER concrete infrastructure classes. This applies to repositories AND infrastructure services (file storage, email, Excel processing, external APIs, etc.).
 
 **Critical**: The `run()` or `run_async()` methods are inherited from `BaseInteractor` and orchestrate validation → processing flow.
 
@@ -110,6 +112,58 @@ class PostgresSomeRepository(SomeRepository):
         pass
 ```
 
+#### Infrastructure Service Interfaces (Ports)
+When an interactor depends on an infrastructure concern beyond data access (file storage, email sending, Excel processing, external API clients, etc.), you MUST create an **ABC interface in the domain layer** and have the infrastructure class implement it. This is the same Ports and Adapters pattern used for repositories, applied to ALL infrastructure dependencies.
+
+**Domain Layer** (Port - `src/{domain}/domain/`):
+```python
+from abc import ABC, abstractmethod
+
+class FileStorageService(ABC):
+    """Interface for file storage operations."""
+
+    @abstractmethod
+    def upload_file(self, content: bytes, key: str, content_type: str = 'application/octet-stream') -> str:
+        pass
+
+    @abstractmethod
+    def download_file(self, key: str) -> bytes:
+        pass
+
+    @abstractmethod
+    def delete_file(self, key: str) -> None:
+        pass
+```
+
+**Infrastructure Layer** (Adapter - `src/{domain}/infrastructure/` or `src/common/infrastructure/`):
+```python
+class S3Client(FileStorageService):
+    """AWS S3 implementation of FileStorageService."""
+
+    def upload_file(self, content: bytes, key: str, content_type: str = 'application/octet-stream') -> str:
+        # boto3 implementation
+        pass
+
+    def download_file(self, key: str) -> bytes:
+        # boto3 implementation
+        pass
+
+    def delete_file(self, key: str) -> None:
+        # boto3 implementation
+        pass
+```
+
+**When to create a service interface:**
+- The interactor needs to interact with an external system (S3, email, SMS, payment gateway)
+- The interactor uses an infrastructure tool (Excel parser, PDF generator, CSV processor)
+- The dependency could have alternative implementations (local storage vs S3, different email providers)
+- The dependency makes the interactor hard to test without the interface
+
+**When NOT to create a service interface:**
+- Pure utility functions with no infrastructure dependency (string formatting, math calculations)
+- Logger services (these are cross-cutting concerns, using the concrete singleton is acceptable)
+- Simple value objects or DTOs
+
 #### DTOs (Data Transfer Objects)
 Used for data flow between layers:
 - Request DTOs: Input data from routes
@@ -117,16 +171,18 @@ Used for data flow between layers:
 - Entity DTOs: Data for repository operations
 
 #### Dependency Injection
-Dependencies are configured in `*_depends.py` files and injected through FastAPI's dependency injection:
+Dependencies are configured in `*_depends.py` files and injected through FastAPI's dependency injection. The factory is the **only place** where concrete implementations are instantiated:
 
 ```python
 def some_interactor_depends(db: Session = Depends(get_db)) -> SomeInteractor:
     return SomeInteractor(
-        repository=PostgresSomeRepository(db),
-        translate=TranslateService(),
+        repository=PostgresSomeRepository(db),  # Concrete repo → abstract SomeRepository
+        file_storage=S3Client(),                # Concrete service → abstract FileStorageService
         logger=LoggerService()
     )
 ```
+
+**Key principle**: Interactors declare dependencies using **domain interfaces** (ABC). Factories wire the **concrete implementations**. This ensures the application layer has zero knowledge of infrastructure details.
 
 ### 3. Entity Management
 
@@ -165,9 +221,10 @@ The project uses a shared library `voltop-common-structure` that provides:
 - Break large interfaces into smaller, focused ones
 
 ### Dependency Inversion Principle (DIP)
-- Interactors depend on repository abstractions (interfaces), not implementations
+- Interactors depend on **all infrastructure abstractions** (interfaces), not implementations — this includes repositories, file storage services, Excel processors, email services, external API clients, and any other infrastructure concern
 - Infrastructure implementations depend on domain abstractions
 - Use dependency injection to wire concrete implementations
+- **Type hints in interactor constructors MUST use ABC interfaces from the domain layer**, never concrete classes from infrastructure
 
 ## Design Patterns Catalog
 
@@ -334,6 +391,7 @@ ls src/*/infrastructure/routes/v1/*.py | head -5
 - [ ] Includes unit tests with >80% coverage
 - [ ] Follows naming conventions
 - [ ] Uses dependency injection properly
+- [ ] **All infrastructure dependencies use domain ABC interfaces** - interactor type hints reference abstractions, not concrete classes
 - [ ] **Avoids over-engineering** - no unnecessary abstractions, patterns, or complexity beyond what's required
 
 ## Alembic Migrations
@@ -382,6 +440,7 @@ def downgrade() -> None:
 4. **God Objects**: Don't create repositories with too many responsibilities
 5. **Tight Coupling**: Don't import infrastructure implementations in domain layer
 6. **Over-Engineering**: Don't add unnecessary abstractions, patterns, or complexity beyond what's required
+7. **Concrete Infrastructure Types in Interactors**: Don't use concrete classes (e.g., `S3Client`, `ExcelProcessor`) as type hints in interactor constructors — always use their domain ABC interface (`FileStorageService`, `ExcelProcessorService`)
 
 ### ❌ Common Mistakes
 1. **Forgetting Transactions**: Wrap multiple DB operations in transactions
