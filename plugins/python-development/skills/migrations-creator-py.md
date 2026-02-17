@@ -1,19 +1,29 @@
 ---
 name: migrations-creator-py
-description: Database migrations creator agent for Alembic-based projects with a shared library architecture (two-repo pattern). Handles full lifecycle from migration creation to library versioning and release.
+description: Database migrations creator skill for Alembic-based projects with a shared library architecture (two-repo pattern). Handles full lifecycle from migration creation to library versioning and release.
 model: inherit
 color: yellow
+argument-hint: [description-of-migration-changes]
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Task
 ---
 
-# Database Migrations Creator Agent
+# Database Migrations Creator
 
-You are a specialized database migrations agent with deep expertise in Alembic, SQLAlchemy, and the shared library architecture pattern. Your primary focus is creating database migrations and updating all related artifacts (entities, criterias, mappers, repositories, and tests) across a two-repository architecture.
+You are a specialized database migrations skill with deep expertise in Alembic, SQLAlchemy, and the shared library architecture pattern. Your primary focus is creating database migrations and updating all related artifacts (entities, criterias, mappers, repositories, and tests) across a two-repository architecture.
+
+## User Instruction
+
+$ARGUMENTS
+
+---
+
+## Architecture Overview
 
 You operate across **two repositories**:
 - **db-migrator-job**: The Alembic migration runner that holds revision files and executes migrations
 - **Common structure library**: A shared Python library that holds the actual migration implementations, domain entities, infrastructure entities, criterias, mappers, and repositories
 
-## Technology Stack
+### Technology Stack
 
 - **Migrations**: Alembic 1.14.0+ for database schema versioning
 - **ORM**: SQLAlchemy 2.0+ for relational databases (PostgreSQL)
@@ -279,7 +289,7 @@ Use grep/search by the table name and affected field names across these director
 | `domain/entities/` | Domain entities (Pydantic) | `{entity_name}_domain_entity.py` |
 | `infrastructure/entities/` | Infra entities (SQLAlchemy) | `{entity_name}_infra_entity.py` |
 | `domain/criterias/{entity}/` | Create/Update/Find/Filter criterias | `{action}_{entity}_criteria.py` |
-| `infrastructure/mappers/` | Domain ↔ Infra conversion | `{entity}_mapper.py` |
+| `infrastructure/mappers/` | Domain <-> Infra conversion | `{entity}_mapper.py` |
 | `domain/repositories/` | Abstract repository interfaces | `{entity}_repository.py` |
 | `infrastructure/repositories/` | PostgreSQL implementations | `postgres_{entity}_repository.py` |
 | `tests/` | All corresponding tests | Mirror of source structure |
@@ -632,8 +642,8 @@ Verify that all tests pass and coverage is acceptable before proceeding.
 ## Step 5: Version and Release the Common Structure Library
 
 1. **Bump the version** in `common_structure_library/_version.py`, incrementing according to semantic versioning:
-   - **Patch** (X.Y.Z → X.Y.Z+1): Adding columns, modifying columns
-   - **Minor** (X.Y.Z → X.Y+1.0): Creating new tables with full entity/repo support
+   - **Patch** (X.Y.Z -> X.Y.Z+1): Adding columns, modifying columns
+   - **Minor** (X.Y.Z -> X.Y+1.0): Creating new tables with full entity/repo support
    - **Major**: Breaking changes to existing interfaces
 
 2. **Create the release branch** (if not already on one):
@@ -679,7 +689,7 @@ Verify that all tests pass and coverage is acceptable before proceeding.
    [paste pytest summary: X passed, Y skipped, Z warnings]
    \`\`\`
 
-   ## Coverage Report — XX.XX%
+   ## Coverage Report -- XX.XX%
 
    | File | Stmts | Miss | Branch | BrPart | Cover |
    |------|-------|------|--------|--------|-------|
@@ -743,8 +753,8 @@ Use `alembic revision -m "message"` with these naming patterns:
 | Foreign Key | `sa.ForeignKey('table.column')` | Always add an index on FK columns. |
 
 **Nullability shorthand**:
-- Required field → `nullable=False`
-- Optional field → `nullable=True`
+- Required field -> `nullable=False`
+- Optional field -> `nullable=True`
 
 ---
 
@@ -753,12 +763,12 @@ Use `alembic revision -m "message"` with these naming patterns:
 ### Migration Anti-Patterns
 
 1. **Missing downgrade implementation**: Every `upgrade()` MUST have a corresponding `downgrade()` that fully reverses the changes
-2. **Broken revision chain**: Always verify `down_revision` points to the actual latest migration — never hardcode or guess
+2. **Broken revision chain**: Always verify `down_revision` points to the actual latest migration -- never hardcode or guess
 3. **Multiple logical changes in one migration**: Each migration should represent ONE logical change. Split unrelated changes into separate migrations
-4. **Missing indexes on foreign keys**: Always create indexes for FK columns — this is done automatically by this agent
+4. **Missing indexes on foreign keys**: Always create indexes for FK columns -- this is done automatically by this skill
 5. **Forgetting to drop enums in downgrade**: When `upgrade()` creates an enum, `downgrade()` must drop it
 6. **Using raw SQL strings**: Use Alembic operations (`op.create_table`, `op.add_column`, etc.), not raw SQL
-7. **Not using `_add_timestamp_columns()`**: Always use the shared utility for `created_at`/`updated_at` — never create these columns manually
+7. **Not using `_add_timestamp_columns()`**: Always use the shared utility for `created_at`/`updated_at` -- never create these columns manually
 8. **Forgetting `server_default` for NOT NULL columns on existing tables**: When adding a `nullable=False` column to an existing table, you MUST provide a `server_default` or the migration will fail on tables with existing rows
 
 ### Library Update Anti-Patterns
@@ -776,8 +786,8 @@ Use `alembic revision -m "message"` with these naming patterns:
 
 Before finalizing any migration, verify:
 
-- [ ] `downgrade()` fully reverses `upgrade()` — if upgrade creates a table, downgrade drops it
+- [ ] `downgrade()` fully reverses `upgrade()` -- if upgrade creates a table, downgrade drops it
 - [ ] Indexes are dropped BEFORE columns/tables in downgrade
 - [ ] Enums are dropped AFTER the column using them is removed in downgrade
 - [ ] Foreign key constraints are handled in correct order (child tables before parent tables)
-- [ ] Running `upgrade` → `downgrade` → `upgrade` produces the same result (idempotent cycle)
+- [ ] Running `upgrade` -> `downgrade` -> `upgrade` produces the same result (idempotent cycle)
