@@ -11,14 +11,14 @@
       "name": "general",
       "source": "./plugins/general",
       "description": "Language-agnostic agents for software architecture and system design",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "tags": ["architecture", "design", "planning"]
     },
     {
       "name": "python-development",
       "source": "./plugins/python-development",
       "description": "Python backend development agents and skills with Clean Architecture, FastAPI, Celery, and library development",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "tags": ["python", "backend", "clean-architecture", "fastapi", "celery", "library"]
     },
     {
