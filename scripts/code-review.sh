@@ -36,8 +36,8 @@ MODEL="claude-opus-4-20250514"
 ARCH_THRESHOLD=7
 QUALITY_THRESHOLD=7
 TEST_THRESHOLD=8
-MAX_DIFF_SIZE=300000  # ~75K tokens - Claude Opus 200K context allows larger diffs
-MAX_OUTPUT_TOKENS=8192  # Allow exhaustive reviews with all issues listed
+MAX_DIFF_SIZE=300000  # ~75K tokens per section (diffs + file contents each)
+MAX_OUTPUT_TOKENS=16384  # Allow thorough reasoning over large PRs
 MAX_FILES=50  # Maximum number of changed files allowed for review
 
 # =============================================================================
