@@ -189,23 +189,45 @@ get_changes() {
 
   echo "Changed files: ${CHANGED_COUNT}, +${LINES_ADDED} / -${LINES_DELETED}"
 
-  # Create diffs
+  # Create diffs and collect final file contents
   mkdir -p diffs
+  > diffs/all_diffs.txt
+  > diffs/final_contents.txt
+
   while IFS= read -r file; do
     if [[ -f "${file}" ]]; then
+      # Collect diff
       echo "=== DIFF FOR: ${file} ===" >> diffs/all_diffs.txt
       git diff "origin/${BASE_REF}...HEAD" -- "${file}" >> diffs/all_diffs.txt
       echo "" >> diffs/all_diffs.txt
+
+      # Collect final file content (current HEAD state) for accurate review
+      local ext="${file##*.}"
+      echo "### ${file}" >> diffs/final_contents.txt
+      echo "\`\`\`${ext}" >> diffs/final_contents.txt
+      cat "${file}" >> diffs/final_contents.txt
+      echo "" >> diffs/final_contents.txt
+      echo "\`\`\`" >> diffs/final_contents.txt
+      echo "" >> diffs/final_contents.txt
     fi
   done < changed_files.txt
 
-  # Truncate if too large
+  # Truncate diffs if too large
   DIFF_SIZE=$(wc -c < diffs/all_diffs.txt | tr -d ' ')
   if [[ ${DIFF_SIZE} -gt ${MAX_DIFF_SIZE} ]]; then
     echo "Diff too large (${DIFF_SIZE} bytes), truncating..."
     head -c ${MAX_DIFF_SIZE} diffs/all_diffs.txt > diffs/all_diffs_truncated.txt
     printf "\n\n[... Diff truncated due to size ...]" >> diffs/all_diffs_truncated.txt
     mv diffs/all_diffs_truncated.txt diffs/all_diffs.txt
+  fi
+
+  # Truncate final contents if too large (use same limit)
+  CONTENT_SIZE=$(wc -c < diffs/final_contents.txt | tr -d ' ')
+  if [[ ${CONTENT_SIZE} -gt ${MAX_DIFF_SIZE} ]]; then
+    echo "Final contents too large (${CONTENT_SIZE} bytes), truncating..."
+    head -c ${MAX_DIFF_SIZE} diffs/final_contents.txt > diffs/final_contents_truncated.txt
+    printf "\n\n[... Content truncated due to size ...]" >> diffs/final_contents_truncated.txt
+    mv diffs/final_contents_truncated.txt diffs/final_contents.txt
   fi
 }
 
@@ -266,10 +288,10 @@ EOF
         echo "" >> user_prompt.txt
       fi
 
-      echo "**Key Points from Previous Review:**" >> user_prompt.txt
-      echo '```' >> user_prompt.txt
-      grep -A 3 "Issues Found\|Must Fix" last_review_body.txt | head -100 >> user_prompt.txt || echo "No critical issues in previous review" >> user_prompt.txt
-      echo '```' >> user_prompt.txt
+      echo "**Previous Scores Summary:**" >> user_prompt.txt
+      echo "Architecture: ${LAST_ARCH}/10, Code Quality: ${LAST_QUALITY}/10, Testing: ${LAST_TEST}/10" >> user_prompt.txt
+      echo "" >> user_prompt.txt
+      echo "**NOTE**: To determine if previous issues were fixed, check the FINAL FILE CONTENTS section below (not just the diffs). The final file contents show the actual current state of the code." >> user_prompt.txt
       echo "" >> user_prompt.txt
     fi
 
@@ -292,6 +314,16 @@ EOF
   echo '```' >> user_prompt.txt
   echo "" >> user_prompt.txt
 
+  # Final file contents (ground truth for the reviewer)
+  echo "## Final File Contents (Current HEAD State)" >> user_prompt.txt
+  echo "" >> user_prompt.txt
+  echo "**IMPORTANT**: The section below shows the ACTUAL CURRENT content of each changed file." >> user_prompt.txt
+  echo "Use this as the SOURCE OF TRUTH when evaluating code quality, architecture, and whether previous issues were fixed." >> user_prompt.txt
+  echo "The diffs above show what changed, but for multi-commit PRs they may include intermediate states that were later corrected." >> user_prompt.txt
+  echo "" >> user_prompt.txt
+  cat diffs/final_contents.txt >> user_prompt.txt
+  echo "" >> user_prompt.txt
+
   # Incremental review instructions
   if [[ "${REVIEW_COUNT}" -gt 0 ]]; then
     cat >> user_prompt.txt <<EOF
@@ -302,18 +334,20 @@ EOF
 
 You MUST follow this process:
 
-1. **Compare with Previous Review**:
-   - Review the previous feedback and action items above
-   - Identify which issues were addressed in the current changes
-   - Note which issues remain unaddressed
+1. **Use Final File Contents as Source of Truth**:
+   - The "Final File Contents" section shows the ACTUAL CURRENT state of each file
+   - When checking if a previous issue was fixed, look at the FINAL FILE CONTENTS, NOT the diffs
+   - The diffs may show intermediate commit states where issues existed but were later corrected
+   - If the final file content shows the issue is resolved, mark it as COMPLETED regardless of what the diff shows
 
 2. **Validate Progress**:
-   - Mark previous action items as COMPLETED if properly fixed
+   - Mark previous action items as COMPLETED if the final file content shows the fix is in place
    - Mark as PARTIALLY COMPLETED if partially addressed
-   - Mark as NOT ADDRESSED if still pending
+   - Mark as NOT ADDRESSED only if the issue is still present in the FINAL FILE CONTENTS
    - Identify any NEW ISSUES not mentioned before
 
-3. **Update Metrics Based on Progress**:
+3. **Update Metrics Based on Final State**:
+   - Base your metrics on the CURRENT CODE (final file contents), not on intermediate diff states
    - **INCREASE** metrics if critical issues were fixed
    - **DECREASE** metrics if new critical issues appeared or quality regressed
    - **MAINTAIN** metrics if no significant change
@@ -323,14 +357,14 @@ You MUST follow this process:
    - Start with a "Progress Since Last Review" section
    - Show metric evolution with arrows (increased, decreased, unchanged)
    - Explain WHY each metric changed or stayed the same
-   - Only mention NEW issues or PERSISTENT unresolved issues
+   - Only mention NEW issues or PERSISTENT unresolved issues verified against final file contents
    - Acknowledge and recognize improvements made
 
 5. **Decision Logic**:
-   - APPROVE if all previous critical issues are fixed AND no new critical issues
-   - REQUEST_CHANGES if previous critical issues remain OR new critical issues found
+   - APPROVE if all previous critical issues are fixed in the final code AND no new critical issues
+   - REQUEST_CHANGES if previous critical issues remain in the final code OR new critical issues found
 
-**IMPORTANT**: Do NOT re-report issues that were already fixed. Recognize the developer's effort.
+**IMPORTANT**: Do NOT re-report issues from previous reviews unless you have verified the issue STILL EXISTS in the "Final File Contents" section. The diffs show the full branch history and may include code from earlier commits that was subsequently fixed. Always verify against the final state.
 
 ---
 
