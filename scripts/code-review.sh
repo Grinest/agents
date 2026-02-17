@@ -262,7 +262,38 @@ EOF
   cat review_context.json >> user_prompt.txt
   echo "" >> user_prompt.txt
 
-  # Include previous review context if exists
+  # PR description
+  echo "## PR Description" >> user_prompt.txt
+  echo "${PR_BODY:-No description provided}" >> user_prompt.txt
+  echo "" >> user_prompt.txt
+
+  # Changed files list
+  echo "## Changed Files" >> user_prompt.txt
+  cat changed_files.txt >> user_prompt.txt
+  echo "" >> user_prompt.txt
+
+  # Final file contents FIRST (ground truth - must come before diffs and previous context)
+  echo "## Final File Contents (Current HEAD State)" >> user_prompt.txt
+  echo "" >> user_prompt.txt
+  echo "**SOURCE OF TRUTH**: The section below shows the ACTUAL CURRENT content of each changed file." >> user_prompt.txt
+  echo "Base ALL your evaluations (architecture, code quality, security) on this code." >> user_prompt.txt
+  echo "Do NOT report issues unless they are present in the code below." >> user_prompt.txt
+  echo "" >> user_prompt.txt
+  cat diffs/final_contents.txt >> user_prompt.txt
+  echo "" >> user_prompt.txt
+
+  # Diffs SECOND (for understanding what changed)
+  echo "## File Diffs (for reference)" >> user_prompt.txt
+  echo "" >> user_prompt.txt
+  echo "The diffs below show what changed from the base branch. For multi-commit PRs, these may include intermediate states." >> user_prompt.txt
+  echo "Always verify against the Final File Contents above before reporting any issue." >> user_prompt.txt
+  echo "" >> user_prompt.txt
+  echo '```diff' >> user_prompt.txt
+  cat diffs/all_diffs.txt >> user_prompt.txt
+  echo '```' >> user_prompt.txt
+  echo "" >> user_prompt.txt
+
+  # Previous review context LAST (scores only, no action items to avoid bias)
   if [[ "${REVIEW_COUNT}" -gt 0 ]]; then
     cat >> user_prompt.txt <<EOF
 
@@ -270,59 +301,15 @@ EOF
 
 **This is an INCREMENTAL REVIEW** - Review #${REVIEW_NUMBER}
 
-### Previous Review Summary
-- **Review Date**: ${LAST_REVIEW_DATE}
-- **Previous Metrics**:
-  - Architecture: ${LAST_ARCH}/10
-  - Code Quality: ${LAST_QUALITY}/10
-  - Testing: ${LAST_TEST}/10
+- **Previous Review Date**: ${LAST_REVIEW_DATE}
+- **Previous Metrics**: Architecture: ${LAST_ARCH}/10, Code Quality: ${LAST_QUALITY}/10, Testing: ${LAST_TEST}/10
 
-### Previous Review Feedback
+**IMPORTANT**: Evaluate the code FRESH based on the Final File Contents above. Do not assume issues from previous reviews still exist. Only report issues you can verify in the current code.
+
+---
 
 EOF
-
-    if [[ -f last_review_body.txt ]]; then
-      if grep -q "Action Items" last_review_body.txt; then
-        echo "**Previous Action Items:**" >> user_prompt.txt
-        sed -n '/Action Items/,/^---$/p' last_review_body.txt | head -50 >> user_prompt.txt
-        echo "" >> user_prompt.txt
-      fi
-
-      echo "**Previous Scores Summary:**" >> user_prompt.txt
-      echo "Architecture: ${LAST_ARCH}/10, Code Quality: ${LAST_QUALITY}/10, Testing: ${LAST_TEST}/10" >> user_prompt.txt
-      echo "" >> user_prompt.txt
-      echo "**NOTE**: To determine if previous issues were fixed, check the FINAL FILE CONTENTS section below (not just the diffs). The final file contents show the actual current state of the code." >> user_prompt.txt
-      echo "" >> user_prompt.txt
-    fi
-
-    echo "---" >> user_prompt.txt
-    echo "" >> user_prompt.txt
   fi
-
-  # PR description
-  echo "## PR Description" >> user_prompt.txt
-  echo "${PR_BODY:-No description provided}" >> user_prompt.txt
-  echo "" >> user_prompt.txt
-
-  # Changed files and diffs
-  echo "## Changed Files" >> user_prompt.txt
-  cat changed_files.txt >> user_prompt.txt
-  echo "" >> user_prompt.txt
-  echo "## File Diffs" >> user_prompt.txt
-  echo '```diff' >> user_prompt.txt
-  cat diffs/all_diffs.txt >> user_prompt.txt
-  echo '```' >> user_prompt.txt
-  echo "" >> user_prompt.txt
-
-  # Final file contents (ground truth for the reviewer)
-  echo "## Final File Contents (Current HEAD State)" >> user_prompt.txt
-  echo "" >> user_prompt.txt
-  echo "**IMPORTANT**: The section below shows the ACTUAL CURRENT content of each changed file." >> user_prompt.txt
-  echo "Use this as the SOURCE OF TRUTH when evaluating code quality, architecture, and whether previous issues were fixed." >> user_prompt.txt
-  echo "The diffs above show what changed, but for multi-commit PRs they may include intermediate states that were later corrected." >> user_prompt.txt
-  echo "" >> user_prompt.txt
-  cat diffs/final_contents.txt >> user_prompt.txt
-  echo "" >> user_prompt.txt
 
   # Incremental review instructions
   if [[ "${REVIEW_COUNT}" -gt 0 ]]; then
