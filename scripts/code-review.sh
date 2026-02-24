@@ -449,6 +449,28 @@ enforce_decision() {
       echo "  - ${metric}"
     done
     DECISION="REQUEST_CHANGES"
+
+    # Build the reason text for the override notice
+    local REASONS=""
+    for metric in "${FAILING_METRICS[@]}"; do
+      REASONS="${REASONS}\n- ${metric}"
+    done
+
+    # Patch the review content to reflect the overridden decision
+    sed -i 's/\*\*Overall Assessment\*\*: \*\*APPROVE\*\*/\*\*Overall Assessment\*\*: \*\*REQUEST_CHANGES\*\*/g' claude_review.md
+    sed -i 's/### ✅ Decision/### ⚠️ Decision/g' claude_review.md
+    sed -i '/### ⚠️ Decision/{n;s/^\*\*APPROVE\*\*/\*\*REQUEST_CHANGES\*\*/;}' claude_review.md
+
+    # Append override notice at the end of the review
+    cat >> claude_review.md <<EOF
+
+---
+
+> **⚠️ Decision Override**: Claude's initial assessment was APPROVE, but the following metrics did not meet the required thresholds:
+$(printf '%s\n' "${FAILING_METRICS[@]}" | sed 's/^/> - /')
+>
+> The decision has been changed to **REQUEST_CHANGES**. Please address the metrics above before merging.
+EOF
   fi
 }
 
