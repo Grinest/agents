@@ -6,6 +6,9 @@ on:
     paths:
       - 'src/**/*.py'
       - 'tests/**/*.py'
+      - 'requirements.txt'
+      - 'alembic/**'
+      - 'Dockerfile'
 
 # Prevent multiple runs for the same PR
 concurrency:
