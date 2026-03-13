@@ -3,7 +3,7 @@ task: test_agent_with_insufficient_inputs
 phase: 3 - Testing & Validation
 level: L2
 parent: technical.yaml
-status: TODO
+status: DONE
 
 scope: |
   Validar que el agente product NO genera un archivo parcial cuando los

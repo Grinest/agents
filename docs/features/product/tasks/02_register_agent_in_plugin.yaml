@@ -3,7 +3,7 @@ task: register_product_agent_in_plugin
 phase: 1 - Agent Foundation
 level: L1
 parent: technical.yaml
-status: TODO
+status: DONE
 
 scope: |
   Registrar el nuevo agente product en el plugin general. Actualizar

@@ -8,6 +8,10 @@ Language-agnostic agents that work across all technologies and programming langu
 
 - **architect.md**: Software Architecture Agent specializing in system design, architectural decisions, and technical planning. Provides guidance on architecture patterns, technology selection, and system structure regardless of the implementation language.
 
+### Product Specification
+
+- **product.md**: Product Specification Agent that analyzes documents, images, and business context to generate standardized `feature.yaml` files. The generated specification serves as a Definition of Ready (DoR) for engineering teams, ensuring all product requirements are clear, complete, and actionable before implementation begins.
+
 ## Usage
 
 General agents are technology-agnostic and can be used in any project:
@@ -27,6 +31,7 @@ Use general plugin agents when:
 - Making high-level technical decisions
 - Designing system structure and component interactions
 - Evaluating architectural patterns and approaches
+- Generating product specifications from requirements, documents, or mockups
 - Need guidance that applies across programming languages
 
 ## Organization

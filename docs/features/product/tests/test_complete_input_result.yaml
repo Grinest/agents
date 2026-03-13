@@ -1,0 +1,51 @@
+# feature.yaml
+feature: restablecer_contrasena
+owner: product_owner
+version: 1.0
+
+description: |
+  Como usuario registrado de la plataforma,
+  quiero poder restablecer mi contrasena cuando la olvide,
+  para recuperar el acceso a mi cuenta sin necesidad de contactar al soporte.
+  El usuario ingresa su correo electronico y el sistema envia un enlace de restablecimiento
+  con una vigencia de 30 minutos. Al hacer clic en el enlace, el usuario define una nueva
+  contrasena que debe cumplir con los requisitos de seguridad establecidos.
+
+acceptance_criteria:
+  - El usuario puede solicitar el restablecimiento de contrasena desde la pantalla de inicio de sesion
+  - El sistema envia un correo con un enlace de restablecimiento en menos de 30 segundos tras la solicitud
+  - El enlace de restablecimiento deja de ser valido despues de 30 minutos desde su generacion
+  - El usuario puede definir una nueva contrasena que cumpla los requisitos de seguridad (minimo 8 caracteres, al menos una mayuscula, una minuscula y un numero)
+  - Despues de restablecer la contrasena, el usuario puede iniciar sesion con la nueva contrasena
+
+business_rules:
+  - solo_usuarios_registrados: Solo los usuarios registrados en el sistema pueden solicitar el restablecimiento de contrasena
+  - maximo_intentos_por_hora: Maximo 3 solicitudes de restablecimiento por hora por correo electronico
+  - vigencia_enlace: El enlace de restablecimiento expira despues de 30 minutos
+  - enlace_un_solo_uso: El enlace de restablecimiento solo puede ser utilizado una vez
+  - historial_contrasenas: La nueva contrasena no puede ser igual a las ultimas 3 contrasenas utilizadas
+  - longitud_minima_contrasena: La nueva contrasena debe tener minimo 8 caracteres
+  - requisitos_contrasena: La nueva contrasena debe contener al menos una letra mayuscula, una letra minuscula y un numero
+  - correo_no_registrado_sin_revelacion: Si el correo no existe en el sistema, se muestra el mismo mensaje de confirmacion sin revelar que el correo no esta registrado
+
+inputs:
+  - email: texto, formato de correo electronico valido, debe corresponder a un usuario registrado en el sistema
+  - token: texto, token unico de restablecimiento generado por el sistema y enviado al correo del usuario
+  - new_password: texto, nueva contrasena con minimo 8 caracteres, al menos una letra mayuscula, una letra minuscula y un numero, no puede ser igual a las ultimas 3 contrasenas
+
+outputs:
+  - confirmacion_envio_correo: mensaje de confirmacion indicando que si el correo esta registrado se enviara un enlace de restablecimiento (sin revelar si el correo existe o no)
+  - confirmacion_cambio_contrasena: mensaje de confirmacion indicando que la contrasena fue restablecida exitosamente
+  - error_enlace_expirado: error 410, indica que el enlace de restablecimiento ha expirado o ya fue utilizado
+  - error_contrasena_no_cumple_requisitos: error 422, indica que la nueva contrasena no cumple con los requisitos de seguridad establecidos
+  - error_maximo_intentos_excedido: error 429, indica que se ha superado el limite de 3 solicitudes de restablecimiento por hora
+
+tests_scope:
+  - solicitud_exitosa: El usuario solicita restablecimiento con un correo registrado y recibe confirmacion de envio -> se muestra mensaje de confirmacion y se envia el correo con enlace
+  - restablecimiento_exitoso: El usuario accede al enlace valido y define una nueva contrasena que cumple los requisitos -> la contrasena se actualiza y el usuario puede iniciar sesion con ella
+  - error_contrasena_invalida: El usuario intenta definir una nueva contrasena que no cumple los requisitos de seguridad -> el sistema rechaza la contrasena con error 422
+  - error_contrasena_repetida: El usuario intenta definir una nueva contrasena igual a una de sus ultimas 3 contrasenas -> el sistema rechaza la contrasena con error 422
+  - error_enlace_expirado: El usuario intenta usar un enlace despues de 30 minutos de su generacion -> el sistema rechaza la solicitud con error 410
+  - error_enlace_ya_utilizado: El usuario intenta usar un enlace que ya fue utilizado previamente -> el sistema rechaza la solicitud con error 410
+  - error_limite_intentos: El usuario solicita restablecimiento mas de 3 veces en una hora con el mismo correo -> el sistema rechaza la solicitud con error 429
+  - correo_no_registrado: El usuario solicita restablecimiento con un correo que no esta registrado -> el sistema muestra el mismo mensaje de confirmacion sin revelar que el correo no existe

@@ -3,7 +3,7 @@ task: implement_generation_phase
 phase: 2 - Agent Pipeline
 level: L3
 parent: technical.yaml
-status: TODO
+status: DONE
 
 scope: |
   Implementar la Fase 3 (GenerationPhase) dentro del prompt del agente
