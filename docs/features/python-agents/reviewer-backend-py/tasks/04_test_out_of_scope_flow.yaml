@@ -3,7 +3,7 @@ task: test_out_of_scope_flow
 phase: 2 - Testing & Validation
 level: L2
 parent: technical.yaml
-status: TODO
+status: DONE
 
 scope: |
   Validar que el flujo out_of_scope funciona correctamente en los tres

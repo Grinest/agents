@@ -3,7 +3,7 @@ task: implement_scope_check_in_agent
 phase: 1 - Agent Pipeline Update
 level: L2
 parent: technical.yaml
-status: TODO
+status: DONE
 
 scope: |
   Agregar el Step 0 (Scope Check) al prompt del agente reviewer-backend-py.md.

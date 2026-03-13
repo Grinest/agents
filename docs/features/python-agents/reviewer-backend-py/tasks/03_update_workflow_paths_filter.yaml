@@ -3,7 +3,7 @@ task: update_workflow_paths_filter
 phase: 1 - Agent Pipeline Update
 level: L2
 parent: technical.yaml
-status: TODO
+status: DONE
 
 scope: |
   Evaluar y actualizar el filtro de paths del workflow de GitHub Actions

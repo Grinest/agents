@@ -3,7 +3,7 @@ task: update_review_script_scope_filter
 phase: 1 - Agent Pipeline Update
 level: L3
 parent: technical.yaml
-status: TODO
+status: DONE
 
 scope: |
   Actualizar el script code-review.sh para manejar el escenario donde
