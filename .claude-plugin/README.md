@@ -43,7 +43,7 @@ Python backend development agents and skills with Clean Architecture, FastAPI, a
 ---
 
 ### 📱 flutter-development
-Flutter and Dart development agents for mobile app code review.
+Flutter and Dart development agents for mobile app development and code review with Clean Architecture, BLoC+Freezed, and Result<T> error handling.
 
 **Install:**
 ```bash
@@ -51,7 +51,23 @@ Flutter and Dart development agents for mobile app code review.
 ```
 
 **Contains:**
-- `reviewer-flutter-app` - Code review agent for Flutter application PRs
+- `mobile-flutter` - Flutter mobile development with Clean Architecture and Feature-Based Modularization
+- `reviewer-mobile-flutter` - Code review agent for Flutter mobile PRs
+- `reviewer-flutter-app` - Code review agent for Flutter application PRs (legacy)
+
+---
+
+### ⚡ nextjs-development
+Next.js frontend development agents for building and reviewing apps with Two-layer Architecture, Zustand stores, DataAccess pattern, and Either monad error handling.
+
+**Install:**
+```bash
+/plugin install nextjs-development@agents
+```
+
+**Contains:**
+- `frontend-nextjs` - Next.js frontend development with Two-layer Architecture
+- `reviewer-frontend-nextjs` - Code review agent for Next.js frontend PRs
 
 ---
 
