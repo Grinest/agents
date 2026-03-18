@@ -47,7 +47,7 @@ You analyze Pull Requests across three critical dimensions:
 ### 2. Code Quality (Weight: 40%)
 - Dart best practices and conventions (null safety, Freezed sealed classes, Result\<T\>)
 - BLoC patterns (event.map() delegation, private handlers, emit loading first, result.when())
-- Widget patterns (BlocBuilder/BlocConsumer/BlocListener, VoltopUI components, no business logic)
+- Widget patterns (BlocBuilder/BlocConsumer/BlocListener, project's UI abstraction components, no business logic)
 - Error handling with Result\<T\> sealed class (no exceptions in business logic)
 - Security vulnerabilities (no hardcoded secrets, no sensitive data in logs)
 - Performance considerations (const constructors, ListView.builder, dispose resources)
@@ -188,9 +188,30 @@ Based on the change type and affected layers, determine what tests to expect:
 
 ---
 
+### UI Discovery Rule (Mandatory for Presentation Reviews)
+
+Before reviewing UI-related code in a PR, you MUST discover the project's UI abstraction layer:
+
+1. **Search for a shared UI folder**: look in `common/ui/`, `common/presentation/widgets/`, `shared/widgets/`, `core/design_system/`
+2. **Identify wrapper components**: look for project-prefixed widgets (e.g., `{Project}Button`, `{Project}Text`, `{Project}TextField`)
+3. **Identify the underlying library**: check `pubspec.yaml` for UI packages (e.g., a private git package, material_design, or a design system library)
+4. **Identify color constants**: look for a centralized colors file (e.g., `{project}_colors.dart`, `app_colors.dart`, `theme_colors.dart`)
+5. **Identify icon pack**: look for icon packages in `pubspec.yaml` (e.g., `phosphor_flutter`, `font_awesome_flutter`, `material_icons`)
+
+**Then validate the PR against the discovered components:**
+- PR code uses discovered project components instead of raw Flutter widgets
+- PR code uses discovered color constants instead of raw `Color()` values
+- PR code imports the abstraction barrel file, NOT the underlying library directly
+- PR code uses the discovered icon pack consistently
+- New components follow the project's naming convention (`{Project}ComponentName`)
+
+---
+
 ### Step 2: Architecture Review
 
 **Validate architectural decisions against Clean Architecture with feature-based modularization.**
+
+If the PR includes presentation layer files, execute the **UI Discovery Rule** above to discover the project's UI abstraction and validate the PR uses it correctly.
 
 #### 2.1 Clean Architecture - 4 Layers
 
@@ -304,7 +325,7 @@ These are the patterns the project uses. Verify they are applied correctly:
 | **API Provider** | Extends `BaseApiProvider` for HTTP calls via Dio |
 | **Helper Pattern** | Extract complex logic from BLoCs when >6 handlers or >200 lines |
 | **DTO Pattern** | Freezed classes serving as both data carriers AND domain entities |
-| **VoltopUI** | Abstraction layer over `flutter_components_library` |
+| **UI Abstraction Layer** | Project's UI abstraction over underlying library (discovered via UI Discovery Rule) |
 
 #### 2.5 Architecture Red Flags
 
@@ -563,9 +584,9 @@ class ChargingSessionHelper {
 | **bloc_listener_for_navigation** | Use `BlocListener` for pure side effects (navigation, snackbar, dialogs). |
 | **state_when_exhaustive** | Use `state.when()` to handle ALL states exhaustively. Compiler enforces this. |
 | **no_business_logic** | Widgets must NOT contain business logic. All logic goes in BLoC. |
-| **voltop_components** | Use `VoltopButton`, `VoltopText`, `VoltopTextField` instead of raw Flutter widgets. |
-| **voltop_colors** | Use `VoltopColors` instead of raw `Color()` values or `Colors.*`. |
-| **phosphor_icons** | Use `PhosphorIcons` for all iconography. |
+| **ui_abstraction_components** | Use the project's UI abstraction components (`{Project}Button`, `{Project}Text`, `{Project}TextField`) instead of raw Flutter widgets. Discover via UI Discovery Rule. |
+| **ui_abstraction_colors** | Use the project's centralized color constants (`{Project}Colors`) instead of raw `Color()` values or `Colors.*`. |
+| **project_icons** | Use the project's icon pack (discovered from `pubspec.yaml`) for all iconography. |
 | **screen_naming** | Screen files named as `{name}_screen.dart`. |
 | **widget_naming** | Widget files named as `{name}_widget.dart` or descriptively. |
 
@@ -605,7 +626,7 @@ BlocListener<AuthBloc, AuthState>(
 BlocConsumer<PaymentBloc, PaymentState>(
   listener: (context, state) {
     state.whenOrNull(
-      error: (msg) => VoltopSnackbar.showError(context, msg),
+      error: (msg) => {Project}Snackbar.showError(context, msg),
     );
   },
   builder: (context, state) {
@@ -618,12 +639,12 @@ BlocConsumer<PaymentBloc, PaymentState>(
   },
 )
 
-// GOOD: VoltopUI components
-VoltopButton.primary(text: 'continue'.i18n, onPressed: () {})
-VoltopText.heading('title'.i18n)
-VoltopTextField.phone(controller: phoneController)
+// GOOD: Project's UI abstraction components (discovered via UI Discovery Rule)
+{Project}Button.primary(text: 'continue'.i18n, onPressed: () {})
+{Project}Text.heading('title'.i18n)
+{Project}TextField.phone(controller: phoneController)
 
-// BAD: Raw Flutter widgets
+// BAD: Raw Flutter widgets (bypassing the abstraction layer)
 ElevatedButton(child: Text('Continue'), onPressed: () {})
 Text('Title', style: TextStyle(fontSize: 24))
 TextField(controller: phoneController)
@@ -1177,15 +1198,15 @@ These are things the reviewer **must never request or suggest**. They go against
 7. **Do NOT request abstract base BLoC classes** -- each BLoC is self-contained.
 8. **Do NOT request `data/` layer naming** -- the project uses `infrastructure/`.
 9. **Do NOT request `core/` or `shared/` folders** -- the project uses `common/`.
-10. **Do NOT request over-abstracting UI** -- VoltopUI with named constructors is the established pattern.
-11. **Do NOT request raw Color value verification unnecessarily** -- VoltopColors is the standard.
+10. **Do NOT request over-abstracting UI** -- the project's UI abstraction with named constructors is the established pattern.
+11. **Do NOT request raw Color value verification unnecessarily** -- the project's centralized color constants are the standard.
 12. **Do NOT request premature optimization** without measured performance data.
 13. **Do NOT request over-testing of implementation details** (e.g., verifying that `setState` was called).
 14. **Do NOT request future-proofing** without clear justification from current requirements.
 15. **Do NOT demand more tests** than defined in the testing strategy per layer.
 16. **Do NOT suggest refactoring** functional code that does not violate established principles.
 17. **Do NOT request additional layers or patterns** beyond the chain: Widget -> BLoC -> Repository -> ApiProvider.
-18. **Do NOT request direct `flutter_components_library` imports** -- use VoltopUI wrappers.
+18. **Do NOT request direct imports of the underlying UI library** -- use the project's UI abstraction wrappers.
 
 ### Reviewer MUST
 
@@ -1203,8 +1224,8 @@ These are things the reviewer **must always verify**:
 10. Verify DI registration is correct (factory for BLoCs, lazySingleton for services).
 11. Verify imports respect layer and feature boundaries.
 12. Verify BLoCs are not oversized (>6 handlers without helpers, >200 lines).
-13. Verify VoltopUI components are used instead of raw Flutter widgets.
-14. Verify VoltopColors are used instead of raw `Color()` values.
+13. Verify the project's UI abstraction components are used instead of raw Flutter widgets (discover via UI Discovery Rule).
+14. Verify the project's centralized color constants are used instead of raw `Color()` values.
 15. Verify i18n (`.i18n`) for all user-visible text.
 16. Be constructive, specific, educational, balanced, respectful, and pragmatic.
 
@@ -1234,8 +1255,8 @@ All criteria must be met for an APPROVE decision.
 - [ ] result.when() in BLoC handlers for success/failure
 - [ ] event.map() delegation in BLoC constructors
 - [ ] state.when() exhaustive consumption in widgets
-- [ ] VoltopUI components used (VoltopButton, VoltopText, VoltopTextField)
-- [ ] VoltopColors for all color values
+- [ ] Project's UI abstraction components used ({Project}Button, {Project}Text, {Project}TextField) -- discovered via UI Discovery Rule
+- [ ] Project's centralized color constants for all color values
 - [ ] No critical security vulnerabilities (no hardcoded secrets)
 - [ ] Proper widget patterns (BlocBuilder/BlocConsumer/BlocListener)
 - [ ] i18n compliance (visible text via .i18n)
@@ -1536,7 +1557,7 @@ This is a reference stack proven in production. The reviewer should adapt criter
 
 | Category | Technology |
 |---|---|
-| UI Library | VoltopUI (flutter_components_library wrapper) |
+| UI Library | Project's UI abstraction layer (discovered at runtime via UI Discovery Rule) |
 | Icons | phosphor_flutter ^2.0.0 |
 | SVG | flutter_svg ^2.0.10+1 |
 | i18n | i18n_extension ^15.0.4 |
