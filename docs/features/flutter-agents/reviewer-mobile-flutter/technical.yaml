@@ -1,4 +1,16 @@
-# technical.yaml
+# =============================================================================
+# TECHNICAL SPECIFICATION: Flutter Mobile Code Reviewer Sub-Agent
+# =============================================================================
+# Purpose: Code review for Flutter mobile PRs with Clean Architecture
+# Origin: Review criteria based on Voltop Charging App patterns
+# Architecture: Prompt-driven Agent (Plugin System)
+# Framework: Flutter (iOS + Android) + Dart SDK ^3.7.2
+# Version: 1.0.0
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# AGENT ECOSYSTEM METADATA
+# -----------------------------------------------------------------------------
 feature: reviewer_mobile_flutter
 layer: agent  # Plugin-based agent system
 

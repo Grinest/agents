@@ -1,34 +1,153 @@
 # =============================================================================
-# FLUTTER MOBILE DEVELOPMENT AGENT - TECHNICAL SPECIFICATION
+# TECHNICAL SPECIFICATION: Flutter Mobile Development Sub-Agent
 # =============================================================================
-# This file is the single source of truth for a Claude sub-agent that guides
-# Flutter development on the Voltop Charging App project.
-#
-# Project: Voltop Charging App (EV Charging Mobile App)
-# Platform: Flutter (iOS + Android)
-# Dart SDK: ^3.7.2
-# Flutter Version: Latest stable
-# App Version: 1.7.1+12
+# Purpose: Standardize Flutter mobile development with Clean Architecture
+# Origin: Patterns extracted from Voltop Charging App (production-proven)
+# Architecture: Clean Architecture with Feature-Based Modularization
+# Framework: Flutter (iOS + Android) + Dart SDK ^3.7.2
+# Version: 1.0.0
 # =============================================================================
 
-agent_metadata:
-  name: "flutter-mobile-architect"
-  version: "1.0.0"
-  description: >
-    Specialized Claude sub-agent for guiding Flutter mobile development on the
-    Voltop Charging App. This agent enforces Clean Architecture with feature-based
-    modularization, BLoC + Freezed state management, and project-specific patterns.
-    It provides architectural decisions, code review guidance, and generates new
-    features following established conventions.
-  target: "Flutter mobile (iOS + Android)"
-  language: "Dart"
-  sdk: "^3.7.2"
-  app_package: "voltop_charging_app"
+# -----------------------------------------------------------------------------
+# AGENT ECOSYSTEM METADATA
+# -----------------------------------------------------------------------------
+feature: mobile_flutter_development
+layer: agent  # Plugin-based agent system
 
-# =============================================================================
-# ARCHITECTURE
-# =============================================================================
 architecture:
+  pattern: Prompt-driven Agent (Plugin System)
+  entry: Task tool with subagent_type "flutter-development:mobile-flutter"
+  agent_definition: plugins/flutter-development/agents/mobile-flutter.md
+  model: inherit  # Inherits model from parent conversation
+  tools_access: All tools
+
+agent_contract:
+  invocation: Task tool subagent_type "flutter-development:mobile-flutter"
+  model: inherit
+  tools: [Read, Write, Edit, Glob, Grep, Bash]
+  inputs:
+    technical_yaml: especificacion tecnica de la funcionalidad a implementar (generada por el agente architect)
+    user_instruction: descripcion en texto libre de lo que se necesita desarrollar
+    project_codebase: codigo fuente del proyecto para analisis de patrones existentes
+  success_output:
+    type: implementacion completa de la funcionalidad
+    format: archivos de codigo organizados por capas (domain, application/BLoC, infrastructure, presentation)
+    includes:
+      - domain_layer: DTOs (Freezed), repository interfaces (abstract), service interfaces (abstract), enums, models
+      - application_layer: BLoC con Freezed events/states, helper classes (si aplica)
+      - infrastructure_layer: API providers (BaseApiProvider), repository implementations, service implementations, storage services
+      - presentation_layer: screens, widgets con BlocBuilder/BlocConsumer/BlocListener
+      - settings: DI registration (di.dart), routes (app_routes.dart), URL paths (url_paths.dart)
+      - tests: BLoC tests con bloc_test + Mockito, infrastructure tests
+  output_sections:
+    - architectural_decisions: explicacion de decisiones arquitectonicas tomadas
+    - implementation_per_layer: codigo completo por cada capa afectada
+    - error_handling: manejo de errores con Result<T> y RequestError
+    - test_examples: BLoC tests con mocks, fakes y provideDummy
+    - deviation_notes: documentacion de desviaciones de patrones estandar (si las hay)
+
+pipeline:
+  step_1_analyze_existing:
+    input: codebase del proyecto
+    process: |
+      Explorar implementaciones similares en el codebase antes de escribir codigo.
+      Buscar patrones en BLoCs (lib/features/*/application/bloc/*_bloc.dart),
+      repositorios (lib/features/*/domain/repositories/*_repository.dart),
+      API providers (lib/features/*/infrastructure/*_api_provider.dart),
+      DTOs (lib/features/*/domain/dtos/*_dto.dart).
+      Verificar componentes compartidos en common/.
+    output: mapa de patrones existentes, DTOs disponibles y convenciones del proyecto
+
+  step_2_understand_domain:
+    input: patrones existentes + requerimiento del usuario
+    process: |
+      Identificar el feature module donde se implementa.
+      Verificar DTOs y enums existentes en el feature o en common/.
+      Revisar repositorios y servicios relacionados. Comprender
+      el flujo de datos existente y dependencias entre features.
+    output: contexto de dominio con DTOs, repositorios y servicios identificados
+
+  step_3_design:
+    input: contexto de dominio
+    process: |
+      Definir la funcionalidad claramente. Identificar DTOs requeridos
+      (request/response). Disenar metodos de la interfaz del repositorio.
+      Planificar eventos y estados del BLoC. Considerar escenarios de
+      error con Result<T>. Determinar si se requieren helpers para BLoCs
+      complejos o servicios para logica que no es CRUD.
+    output: diseno de alto nivel con interfaces, DTOs, eventos/estados y flujo de datos
+
+  step_4_implement_domain:
+    input: diseno de alto nivel
+    process: |
+      Implementar capa de dominio primero: DTOs con Freezed (request con
+      json_serializable, response con custom fromJson), repository interfaces
+      como abstract classes, service interfaces como abstract classes (si aplica),
+      enums y models.
+    output: archivos de domain layer completados
+
+  step_5_implement_infrastructure:
+    input: domain layer + diseno
+    process: |
+      Implementar capa de infraestructura: API providers extendiendo
+      BaseApiProvider con Result<T> returns, repository implementations
+      delegando a API providers, service implementations (si aplica),
+      storage services con SharedPreferences (si aplica).
+      Agregar URL paths en settings/url_paths.dart.
+    output: archivos de infrastructure layer completados
+
+  step_6_implement_application:
+    input: domain + infrastructure layers
+    process: |
+      Implementar BLoC con Freezed events y states. Usar event.map()
+      para delegation a handlers privados. Emitir loading antes de
+      operaciones async. Usar result.when() para manejar success/failure.
+      Extraer helpers si el BLoC tiene >6 event handlers o >200 lineas.
+      Inyectar dependencias via constructor (abstract types).
+    output: BLoC, events, states y helpers completados
+
+  step_7_implement_presentation:
+    input: BLoC + domain types
+    process: |
+      Implementar screens y widgets usando BlocBuilder para rebuilds,
+      BlocConsumer para side effects + rebuilds, BlocListener para
+      side effects puros. Usar VoltopUI components (VoltopButton,
+      VoltopText, VoltopTextField). Usar VoltopColors para colores.
+      Usar PhosphorIcons para iconografia. Textos via .i18n.
+    output: screens y widgets completados
+
+  step_8_register_dependencies:
+    input: todos los archivos implementados
+    process: |
+      Registrar dependencias en settings/di.dart: API provider como
+      lazySingleton, repository como lazySingleton (abstract type),
+      service como lazySingleton (si aplica), BLoC como factory.
+      Agregar ruta en settings/app_routes.dart.
+    output: DI y routing configurados
+
+  step_9_implement_tests:
+    input: todos los archivos implementados
+    process: |
+      Crear mock file con @GenerateMocks en test/features/{feature}/application/bloc/mocks/.
+      Crear BLoC tests con blocTest helper: testar estado inicial, success y
+      failure para cada evento, flujos secuenciales, edge cases.
+      Usar Fake para analytics/logger, Mock para repositorios.
+      provideDummy<Result<T>>() en setUpAll. Close BLoC en tearDown.
+      Ejecutar build_runner para generar mocks. Ejecutar flutter test.
+    output: suite de tests completa
+
+  step_10_code_generation:
+    input: todos los archivos con @freezed y @GenerateMocks
+    process: |
+      Ejecutar dart run build_runner build --delete-conflicting-outputs
+      para generar archivos .freezed.dart, .g.dart y .mocks.dart.
+      Verificar que no hay errores de generacion.
+    output: archivos generados actualizados
+
+# =============================================================================
+# ARCHITECTURAL PATTERNS
+# =============================================================================
+architectural_patterns:
   pattern: "Clean Architecture with Feature-Based Modularization (Hybrid)"
   style: "Modular Monolith (single Flutter app)"
   description: >
