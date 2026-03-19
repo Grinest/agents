@@ -1,0 +1,70 @@
+# tasks/07_create_subagent_architect.yaml
+task: create_subagent_architect
+level: L3
+parent: technical.yaml
+status: PENDING
+phase: "3 - Subagents"
+
+scope: |
+  Crear el subagent @architect de Gemini CLI que genera especificaciones
+  tecnicas (technical.yaml) en formato SDD estandarizado a partir de un
+  feature.yaml existente.
+  El archivo debe incluir frontmatter YAML con configuracion del subagent
+  (name, description, kind, tools, model, temperature, max_turns) y un
+  system prompt adaptado del agente architect de Claude Code (Flujo A).
+  El system prompt debe incluir @imports de convenciones por stack,
+  schema de output y ejemplo de referencia.
+  Adaptar el prompt para Gemini CLI: reemplazar referencias a herramientas
+  de Claude Code por tools de Gemini CLI (read_file, grep_search).
+  El subagent debe poder leer un feature.yaml referenciado y opcionalmente
+  explorar un repositorio local para obtener contexto de arquitectura existente.
+  Solo adaptar Flujo A (feature.yaml -> technical.yaml). Flujo B (tasks)
+  queda fuera de scope para Fase 1.
+
+files_to_create:
+  - gemini/spec-generator/.gemini/agents/architect.md
+
+patterns:
+  - frontmatter:
+      name: architect
+      description: "Genera especificaciones tecnicas (technical.yaml) en formato SDD a partir de un feature.yaml existente"
+      kind: local
+      tools: [read_file, grep_search, list_directory]
+      model: gemini-2.5-pro
+      temperature: 0.3
+      max_turns: 20
+  - system_prompt: adaptado de plugins/general/agents/architect.md (solo Flujo A)
+  - imports: "@conventions-backend-py.md, @conventions-frontend-nextjs.md, @conventions-mobile-flutter.md, @schema-technical.yaml, @example-technical.yaml"
+  - idioma_specs: espanol para contenido de specs generadas
+  - flujo: leer feature.yaml -> solicitar stack -> opcionalmente explorar repo local -> validar -> generar technical.yaml
+  - campos_condicionales: api_contract solo si layer=api, data_model solo si hay persistencia
+  - output: mostrar technical.yaml en terminal (no escribir archivo directamente)
+  - tools_adicionales: list_directory para explorar estructura de repos locales
+
+acceptance:
+  - archivo tiene frontmatter YAML valido con todos los campos requeridos
+  - frontmatter incluye list_directory en tools (para explorar repos locales)
+  - system prompt incluye @imports de las 3 convenciones, schema y ejemplo
+  - system prompt define flujo: leer feature.yaml -> solicitar stack -> explorar repo (opcional) -> validar -> generar
+  - system prompt documenta reglas de campos condicionales (api_contract, data_model, pipeline)
+  - system prompt instruye al subagent a usar read_file para leer el feature.yaml referenciado
+  - NO contiene Flujo B (generacion de tasks) - solo Flujo A
+  - NO contiene referencias a herramientas de Claude Code
+  - el subagent se puede invocar con @architect en Gemini CLI sin errores de carga
+  - tamano estimado: 300-400 lineas
+
+context_files:
+  - plugins/general/agents/architect.md
+  - gemini/spec-generator/conventions-backend-py.md
+  - gemini/spec-generator/conventions-frontend-nextjs.md
+  - gemini/spec-generator/conventions-mobile-flutter.md
+  - gemini/spec-generator/schema-technical.yaml
+  - gemini/spec-generator/example-technical.yaml
+  - docs/features/ai_spec_discovery/fase_1/technical-proposal.md
+
+depends_on:
+  - 01_create_schemas
+  - 02_create_examples
+  - 03_extract_conventions_backend_py
+  - 04_extract_conventions_frontend_nextjs
+  - 05_extract_conventions_mobile_flutter

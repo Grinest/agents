@@ -1,0 +1,63 @@
+# tasks/06_create_subagent_product.yaml
+task: create_subagent_product
+level: L3
+parent: technical.yaml
+status: PENDING
+phase: "3 - Subagents"
+
+scope: |
+  Crear el subagent @product de Gemini CLI que genera especificaciones
+  de producto (feature.yaml) en formato SDD estandarizado.
+  El archivo debe incluir frontmatter YAML con configuracion del subagent
+  (name, description, kind, tools, model, temperature, max_turns) y un
+  system prompt adaptado del agente product de Claude Code.
+  El system prompt debe incluir @imports de convenciones por stack,
+  schema de output y ejemplo de referencia.
+  Adaptar el prompt para Gemini CLI: reemplazar referencias a herramientas
+  de Claude Code (Read, Write, Glob, AskUserQuestion) por interaccion
+  conversacional y tools de Gemini CLI (read_file, grep_search).
+  NO copiar el agente original tal cual. Adaptar la logica de validacion,
+  pipeline y formato preservando la esencia del flujo.
+
+files_to_create:
+  - gemini/spec-generator/.gemini/agents/product.md
+
+patterns:
+  - frontmatter:
+      name: product
+      description: "Genera especificaciones de producto (feature.yaml) en formato SDD estandarizado"
+      kind: local
+      tools: [read_file, grep_search]
+      model: gemini-2.5-pro
+      temperature: 0.3
+      max_turns: 15
+  - system_prompt: adaptado de plugins/general/agents/product.md
+  - imports: "@conventions-backend-py.md, @conventions-frontend-nextjs.md, @conventions-mobile-flutter.md, @schema-feature.yaml, @example-feature.yaml"
+  - idioma_specs: espanol para contenido de specs generadas
+  - flujo: solicitar descripcion -> preguntar stack -> validar completitud -> generar feature.yaml
+  - output: mostrar feature.yaml en terminal (no escribir archivo directamente)
+
+acceptance:
+  - archivo tiene frontmatter YAML valido con todos los campos requeridos (name, description, kind, tools, model, temperature, max_turns)
+  - system prompt incluye @imports de las 3 convenciones, schema y ejemplo
+  - system prompt define flujo claro: recopilar info -> validar completitud -> generar spec
+  - system prompt instruye al modelo a solicitar datos faltantes antes de generar
+  - NO contiene referencias a herramientas de Claude Code (Read, Write, Glob, AskUserQuestion)
+  - el subagent se puede invocar con @product en Gemini CLI sin errores de carga
+  - tamano estimado: 200-300 lineas
+
+context_files:
+  - plugins/general/agents/product.md
+  - gemini/spec-generator/conventions-backend-py.md
+  - gemini/spec-generator/conventions-frontend-nextjs.md
+  - gemini/spec-generator/conventions-mobile-flutter.md
+  - gemini/spec-generator/schema-feature.yaml
+  - gemini/spec-generator/example-feature.yaml
+  - docs/features/ai_spec_discovery/fase_1/technical-proposal.md
+
+depends_on:
+  - 01_create_schemas
+  - 02_create_examples
+  - 03_extract_conventions_backend_py
+  - 04_extract_conventions_frontend_nextjs
+  - 05_extract_conventions_mobile_flutter

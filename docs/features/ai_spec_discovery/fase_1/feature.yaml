@@ -1,0 +1,70 @@
+# feature.yaml
+feature: ai_spec_discovery_fase_1
+owner: product_owner
+version: 1.0
+
+description: |
+  Como Product Owner o Arquitecto de software,
+  puedo usar Gemini CLI desde mi terminal para generar especificaciones de producto
+  (feature.yaml) y especificaciones tecnicas (technical.yaml) en formato SDD estandarizado,
+  invocando subagents especializados (@product y @architect) definidos en .gemini/agents/
+  con convenciones pre-configuradas por stack (Python/FastAPI, Next.js, Flutter) y pudiendo
+  referenciar repositorios locales para que el modelo tenga contexto de la arquitectura existente.
+  El plugin se ubica en gemini/spec-generator/ (separado de plugins/ de Claude Code para evitar
+  sincronizacion con el marketplace de Claude). Las especificaciones generadas son compatibles
+  con los agentes de desarrollo de Claude Code (product, architect, backend-py, frontend-nextjs,
+  mobile-flutter) y se almacenan en el repositorio del proyecto bajo docs/features/ para ser
+  consumidas en la fase de Delivery. Esta fase valida el enfoque multi-modelo (Gemini en
+  Discovery, Claude Code en Delivery) con inversion minima antes de construir un servicio
+  centralizado.
+
+acceptance_criteria:
+  - PO o Arquitecto ejecuta Gemini CLI en gemini/spec-generator/ e invoca @product para generar un feature.yaml valido para una funcionalidad nueva
+  - PO o Arquitecto invoca @architect para generar un technical.yaml a partir de un feature.yaml existente usando Gemini CLI
+  - Las especificaciones generadas cumplen el formato SDD estandarizado y son consumibles por los agentes product y architect de Claude Code sin modificaciones
+  - Las convenciones de arquitectura por stack (Clean Architecture para Python, Two-layer para Next.js, 4-layer para Flutter) se reflejan correctamente en las specs tecnicas generadas
+  - El usuario puede referenciar un repositorio local para que Gemini CLI tenga contexto de la estructura y patrones del proyecto destino
+  - Los subagents (@product y @architect) en .gemini/agents/ cargan correctamente con sus convenciones, schemas y contexto al ser invocados
+  - La generacion de una especificacion completa toma menos de 30 segundos
+  - Existe documentacion clara (README) para que cualquier miembro del equipo pueda instalar y usar el plugin en menos de 10 minutos
+
+business_rules:
+  - modelo_por_defecto: Gemini 3.1 Pro via Vertex AI (proyecto GCP existente)
+  - modelo_alternativo: Gemini 3 Flash para iteraciones rapidas o features simples
+  - creditos_gcp: el equipo cuenta con creditos activos en la consola de GCP que cubren el consumo de Vertex AI
+  - autenticacion_vertex_ai: ADC via gcloud auth application-default login (recomendado) o Service Account JSON key con rol roles/aiplatform.user. Vertex AI NO soporta API keys directamente
+  - variables_entorno: GOOGLE_CLOUD_PROJECT (project ID con creditos) y GOOGLE_CLOUD_LOCATION (us-central1)
+  - convenciones_python: extraidas del agente backend-py (Clean Architecture 3 capas, Repository pattern, OutputSuccessContext/OutputErrorContext)
+  - convenciones_nextjs: extraidas del agente frontend-nextjs (Two-layer Architecture, Either pattern, Zustand stores, DataAccess pattern)
+  - convenciones_flutter: extraidas del agente mobile-flutter (Clean Architecture 4 capas, BLoC pattern, Result<T>, Freezed, feature-based modularization)
+  - formato_output_product: feature.yaml con secciones description, acceptance_criteria, business_rules, inputs, outputs, tests_scope
+  - formato_output_technical: technical.yaml con secciones feature, layer, architecture, api_contract, pipeline, data_model, dependencies
+  - invocacion_subagents: el usuario invoca @product o @architect en la sesion de Gemini CLI para activar el rol especializado correspondiente
+  - ubicacion_plugin: gemini/spec-generator/ en la raiz del repositorio claude-agents, separado de plugins/ para evitar sincronizacion con el marketplace de Claude Code
+  - contexto_repo_local: el usuario puede indicar a Gemini CLI que lea archivos o directorios de cualquier repositorio local clonado
+  - almacenamiento_specs: las especificaciones generadas se guardan manualmente en el repositorio del proyecto bajo docs/features/{feature_name}/
+  - compatibilidad_agentes: las specs generadas deben ser identicas en estructura a las que generan los agentes product y architect de Claude Code
+
+inputs:
+  - descripcion_funcionalidad: texto libre que el usuario escribe en la terminal de Gemini CLI describiendo la funcionalidad
+  - stack_tecnologico: el usuario indica en la conversacion el stack destino (python_fastapi, nextjs, flutter, multi_stack)
+  - patron_arquitectura: el usuario indica el patron (clean_architecture, hexagonal_architecture)
+  - repositorio_local: path a un repositorio local que Gemini CLI puede leer para obtener contexto de arquitectura existente (opcional)
+  - feature_yaml_existente: path a un feature.yaml previo para generar el technical.yaml (solo para specs tecnicas)
+
+outputs:
+  - feature_yaml: archivo feature.yaml generado por Gemini CLI en formato SDD estandarizado
+  - technical_yaml: archivo technical.yaml generado por Gemini CLI con especificacion tecnica
+  - technical_proposal_md: archivo technical-proposal.md con diagramas y analisis (opcional, si el usuario lo solicita)
+
+tests_scope:
+  - generacion_product_spec: usuario invoca @product y describe funcionalidad -> genera feature.yaml con todas las secciones SDD requeridas
+  - generacion_technical_spec: usuario invoca @architect y proporciona feature.yaml existente -> genera technical.yaml con architecture, api_contract y dependencies
+  - convenciones_python_reflejadas: spec tecnica para stack python_fastapi incluye Clean Architecture 3 capas, Repository pattern ABC, OutputSuccessContext
+  - convenciones_nextjs_reflejadas: spec tecnica para stack nextjs incluye Two-layer Architecture, Either pattern, DataAccess sin interfaces
+  - convenciones_flutter_reflejadas: spec tecnica para stack flutter incluye Clean Architecture 4 capas, BLoC, Result<T>, Freezed, feature-based
+  - contexto_repo_local: usuario indica path a repo local -> Gemini CLI lee estructura y refleja patrones existentes en la spec generada
+  - compatibilidad_con_agentes_claude: feature.yaml generado es consumible por el agente architect de Claude Code sin errores de validacion
+  - compatibilidad_con_agentes_claude_tech: technical.yaml generado es consumible por el agente architect de Claude Code para generar tareas
+  - carga_subagents: al invocar @product o @architect en gemini/spec-generator/, los subagents cargan correctamente su contexto, convenciones y schemas
+  - documentacion_onboarding: nuevo miembro del equipo puede instalar y generar primera spec siguiendo el README en menos de 10 minutos

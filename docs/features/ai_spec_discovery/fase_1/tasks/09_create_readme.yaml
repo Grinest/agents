@@ -1,0 +1,52 @@
+# tasks/09_create_readme.yaml
+task: create_readme
+level: L2
+parent: technical.yaml
+status: PENDING
+phase: "5 - README y Documentacion"
+
+scope: |
+  Crear el archivo README.md del plugin gemini/spec-generator/ con
+  documentacion completa para onboarding del equipo.
+  El README debe permitir que cualquier miembro del equipo pueda
+  instalar y generar su primera spec en menos de 10 minutos.
+  Incluir: requisitos previos, autenticacion GCP (ADC y Service Account),
+  configuracion de variables de entorno, invocacion de subagents
+  (@product y @architect), ejemplos de uso, y troubleshooting.
+
+files_to_create:
+  - gemini/spec-generator/README.md
+
+patterns:
+  - estructura_readme:
+      - Descripcion general del plugin
+      - Requisitos previos (Gemini CLI, gcloud CLI, proyecto GCP con creditos)
+      - Instalacion y configuracion (paso a paso)
+      - Autenticacion GCP (metodo ADC recomendado + Service Account alternativo)
+      - Variables de entorno (GOOGLE_CLOUD_PROJECT, GOOGLE_CLOUD_LOCATION)
+      - Uso basico (invocacion de @product y @architect con ejemplos)
+      - Ejemplos avanzados (repo local, Gemini Flash, delegacion automatica)
+      - Estructura de archivos del plugin (tabla descriptiva)
+      - Troubleshooting (errores comunes de autenticacion, permisos)
+  - ejemplos_incluir: los 4 ejemplos de invocacion documentados en technical-proposal.md
+  - nota_api_keys: advertencia explicita de que Vertex AI NO soporta API keys
+  - nota_marketplace: explicar por que el plugin esta en gemini/ y no en plugins/
+  - idioma_readme: espanol
+
+acceptance:
+  - README incluye pasos de instalacion de Gemini CLI
+  - README incluye ambos metodos de autenticacion GCP (ADC + Service Account)
+  - README incluye advertencia sobre API keys no soportadas por Vertex AI
+  - README incluye al menos 4 ejemplos de invocacion de subagents
+  - README incluye seccion de troubleshooting con errores comunes
+  - un nuevo miembro del equipo puede seguir el README y generar su primera spec en < 10 minutos
+  - tamano estimado: 80-120 lineas
+
+context_files:
+  - docs/features/ai_spec_discovery/fase_1/infrastructure-proposal.md
+  - docs/features/ai_spec_discovery/fase_1/technical-proposal.md
+  - docs/features/ai_spec_discovery/fase_1/technical.yaml
+  - gemini/spec-generator/GEMINI.md
+
+depends_on:
+  - 08_create_gemini_md_and_settings
