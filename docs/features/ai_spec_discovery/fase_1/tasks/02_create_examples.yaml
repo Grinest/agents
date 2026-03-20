@@ -1,0 +1,43 @@
+# tasks/02_create_examples.yaml
+task: create_output_examples
+level: L2
+parent: technical.yaml
+status: PENDING
+phase: "1 - Schemas y Ejemplos"
+
+scope: |
+  Crear archivos de ejemplo completos de feature.yaml y technical.yaml
+  que sirvan como referencia concreta para los subagents de Gemini CLI.
+  Los ejemplos deben ser de una funcionalidad realista (no la misma de
+  ai_spec_discovery) para que el modelo tenga un caso diferente como referencia.
+  Los ejemplos son importados por los subagents via @example-feature.yaml
+  y @example-technical.yaml dentro de su system prompt.
+  Usar una funcionalidad ficticia pero realista (ej: modulo de notificaciones,
+  sistema de pagos, gestion de usuarios) que demuestre todos los campos
+  del schema correctamente completados.
+
+files_to_create:
+  - gemini/spec-generator/example-feature.yaml
+  - gemini/spec-generator/example-technical.yaml
+
+patterns:
+  - formato: archivos .yaml con contenido completo y realista
+  - ejemplo_feature: debe incluir todos los campos del schema (description, acceptance_criteria, business_rules, inputs, outputs, tests_scope) con datos realistas
+  - ejemplo_technical: debe incluir campos obligatorios y al menos un campo condicional (api_contract para un endpoint REST) con datos realistas
+  - stack_ejemplo: usar python_fastapi como stack del ejemplo tecnico para mantener consistencia con las convenciones mas detalladas
+  - calidad: los acceptance_criteria del ejemplo deben ser verificables y especificos (no genericos)
+
+acceptance:
+  - example-feature.yaml contiene todos los 9 campos del schema feature.yaml correctamente completados
+  - example-technical.yaml contiene campos obligatorios + api_contract + pipeline con datos realistas
+  - los ejemplos son de una funcionalidad diferente a ai_spec_discovery
+  - un LLM puede usar estos ejemplos como few-shot reference para generar specs similares
+
+context_files:
+  - gemini/spec-generator/schema-feature.yaml
+  - gemini/spec-generator/schema-technical.yaml
+  - docs/features/ai_spec_discovery/fase_1/feature.yaml
+  - docs/features/ai_spec_discovery/fase_1/technical.yaml
+
+depends_on:
+  - 01_create_schemas

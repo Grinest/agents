@@ -1,0 +1,39 @@
+# tasks/01_create_schemas.yaml
+task: create_output_schemas
+level: L2
+parent: technical.yaml
+status: PENDING
+phase: "1 - Schemas y Ejemplos"
+
+scope: |
+  Crear los archivos de schema que definen el formato esperado de output
+  para feature.yaml y technical.yaml en formato SDD estandarizado.
+  Cada schema debe describir en lenguaje natural (no JSON Schema) cada campo
+  con su tipo, obligatoriedad, reglas de redaccion y un mini-ejemplo.
+  Los schemas son importados por los subagents via @schema-feature.yaml
+  y @schema-technical.yaml dentro de su system prompt.
+  NO incluir ejemplos completos (esos van en task 02).
+  NO incluir convenciones de stack (esas van en tasks 03-05).
+
+files_to_create:
+  - gemini/spec-generator/schema-feature.yaml
+  - gemini/spec-generator/schema-technical.yaml
+
+patterns:
+  - formato: archivos .yaml con descripciones en lenguaje natural, no JSON Schema formal
+  - campos_feature_yaml: feature, owner, version, description, acceptance_criteria, business_rules, inputs, outputs, tests_scope
+  - campos_technical_yaml_obligatorios: feature, layer, architecture (pattern, entry, use_case, interfaces), dependencies
+  - campos_technical_yaml_condicionales: api_contract (solo si layer=api), pipeline, data_model, auth, invocation_examples
+  - reglas_redaccion: cada campo debe incluir tipo (string, list, object), obligatoriedad (required/optional), descripcion de contenido esperado, y reglas de redaccion
+  - referencia: usar los feature.yaml y technical.yaml existentes en docs/features/ai_spec_discovery/fase_1/ como referencia de estructura
+
+acceptance:
+  - schema-feature.yaml documenta los 9 campos obligatorios del feature.yaml con tipo, reglas y mini-ejemplo
+  - schema-technical.yaml documenta campos obligatorios y condicionales del technical.yaml
+  - ambos schemas son autocontenidos (no dependen de otros archivos)
+  - un LLM puede generar un feature.yaml/technical.yaml valido siguiendo solo el schema
+
+context_files:
+  - docs/features/ai_spec_discovery/fase_1/feature.yaml
+  - docs/features/ai_spec_discovery/fase_1/technical.yaml
+  - docs/features/ai_spec_discovery/fase_1/technical-proposal.md

@@ -1,0 +1,62 @@
+# tasks/10_validate_and_test.yaml
+task: validate_and_test
+level: L3
+parent: technical.yaml
+status: PENDING
+phase: "6 - Validacion y Testing Manual"
+
+scope: |
+  Validar el plugin completo de Gemini CLI ejecutando pruebas manuales
+  end-to-end. Verificar que los subagents @product y @architect generan
+  specs correctas y compatibles con los agentes de Claude Code.
+  Esta tarea es manual y requiere que el usuario tenga Gemini CLI
+  instalado, credenciales GCP configuradas y acceso a Vertex AI.
+  Documentar los resultados de cada prueba y los ajustes realizados
+  a los system prompts o schemas si es necesario.
+
+  Tests a ejecutar:
+  1. Carga del workspace: ejecutar gemini en gemini/spec-generator/ y
+     verificar que GEMINI.md se carga y los subagents estan disponibles
+  2. @product single prompt: generar feature.yaml con toda la info en un
+     solo mensaje. Verificar que genera sin preguntas y escribe a disco
+  3. @product conversacional: generar feature.yaml con info incompleta.
+     Verificar que solo pregunta datos criticos (descripcion, stack)
+  4. Flujo secuencial: @product genera feature.yaml a disco -> main agent
+     sugiere @architect -> @architect lee feature.yaml del disco -> genera
+     technical.yaml -> main agent sugiere ir a Claude Code
+  5. @architect con repo local: generar technical.yaml referenciando un repo
+     local. Verificar que usa read_file y list_directory
+  6. Compatibilidad Claude Code: usar el agente architect de Claude Code
+     para consumir specs generadas por Gemini (feature.yaml y technical.yaml)
+  7. Delegacion automatica: probar sin @, verificar que Gemini CLI
+     delega al subagent correcto
+  8. Gemini Flash: probar con --model gemini-3-flash para iteracion rapida
+
+files_to_create:
+  - docs/features/ai_spec_discovery/fase_1/test-results.md
+
+patterns:
+  - formato_resultados: tabla con columnas (Test, Resultado, Notas, Ajustes realizados)
+  - criterio_exito: spec generada cumple formato SDD y es consumible por Claude Code
+  - iteracion: si un test falla, ajustar system prompt o schema y re-ejecutar
+  - max_iteraciones: 3 iteraciones por test antes de escalar como issue
+
+acceptance:
+  - los 8 tests documentados se ejecutan y documentan resultados
+  - al menos 6 de 8 tests pasan sin ajustes (80% success rate minimo)
+  - los tests de compatibilidad con Claude Code (test 6) pasan correctamente
+  - el test de carga del workspace (test 1) pasa sin errores
+  - los ajustes realizados a system prompts o schemas se documentan en test-results.md
+  - el archivo test-results.md se genera con resultados completos
+
+context_files:
+  - gemini/spec-generator/GEMINI.md
+  - gemini/spec-generator/.gemini/agents/product.md
+  - gemini/spec-generator/.gemini/agents/architect.md
+  - gemini/spec-generator/README.md
+  - docs/features/ai_spec_discovery/fase_1/feature.yaml
+  - docs/features/ai_spec_discovery/fase_1/technical.yaml
+
+depends_on:
+  - 08_create_gemini_md_and_settings
+  - 09_create_readme

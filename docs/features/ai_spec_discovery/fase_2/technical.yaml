@@ -1,0 +1,312 @@
+# technical.yaml
+feature: ai_spec_discovery
+layer: api  # Modulo FastAPI dentro del backend existente
+
+architecture:
+  pattern: Clean Architecture (3 capas - Domain, Application, Infrastructure)
+  entry: POST /api/v1/specs/product | POST /api/v1/specs/technical | GET /api/v1/specs/{spec_id} | GET /api/v1/specs/health
+  use_case: generacion automatizada de especificaciones de producto y tecnicas mediante modelos de IA (Vertex AI Gemini)
+  interfaces:
+    - SpecGeneratorService: interfaz ABC en domain layer para abstraccion del proveedor de IA (Vertex AI Gemini)
+    - SpecStorageService: interfaz ABC en domain layer para abstraccion de almacenamiento de especificaciones (filesystem)
+    - ModelSelectorService: interfaz ABC en domain layer para logica de seleccion de modelo segun complejidad
+
+api_contract:
+  - endpoint: generate_product_spec
+    method: POST
+    path: /api/v1/specs/product
+    auth: Bearer Token JWT
+    rate_limit: 20 solicitudes/minuto por usuario
+    max_payload: 50 KB
+    request:
+      - field: feature_name
+        type: string
+        required: true
+        description: nombre corto de la funcionalidad en snake_case
+      - field: feature_description
+        type: string
+        required: true
+        description: descripcion de la funcionalidad y lo que debe hacer el sistema
+      - field: business_context
+        type: string
+        required: true
+        description: contexto de negocio que justifica la funcionalidad
+      - field: constraints
+        type: string
+        required: false
+        description: restricciones de negocio o tecnicas conocidas
+      - field: system_stack
+        type: enum[python_fastapi, nextjs, flutter, multi_stack]
+        required: true
+        description: stack tecnologico donde se implementara la funcionalidad
+      - field: architecture_pattern
+        type: enum[clean_architecture, hexagonal_architecture]
+        required: true
+        description: patron de arquitectura a seguir en la implementacion
+      - field: repository_context
+        type: string
+        required: false
+        description: informacion sobre la estructura del repositorio existente
+      - field: previous_specs_reference
+        type: string
+        required: false
+        description: referencia a especificaciones previas relacionadas
+    response:
+      success:
+        status: 201
+        body:
+          - field: spec_id
+            type: string (UUID)
+            description: identificador unico de la especificacion generada
+          - field: feature_name
+            type: string
+            description: nombre de la funcionalidad procesada
+          - field: product_spec_path
+            type: string
+            description: ruta donde se almaceno la especificacion de producto
+          - field: status
+            type: string
+            description: estado de la generacion (completed)
+          - field: generated_at
+            type: string (ISO 8601)
+            description: timestamp de generacion
+          - field: model_used
+            type: string
+            description: modelo de IA utilizado (gemini-3.1-pro o gemini-3-flash)
+          - field: tokens_used
+            type: integer
+            description: cantidad de tokens consumidos en la generacion
+      errors:
+        - status: 401
+          code: UNAUTHORIZED
+          description: token JWT ausente, invalido o expirado
+        - status: 413
+          code: PAYLOAD_TOO_LARGE
+          description: tamano de la solicitud excede 50 KB
+        - status: 422
+          code: VALIDATION_ERROR
+          description: campos obligatorios faltantes o valores fuera de los permitidos
+        - status: 429
+          code: RATE_LIMIT_EXCEEDED
+          description: limite de 20 solicitudes por minuto excedido
+        - status: 502
+          code: AI_PROVIDER_ERROR
+          description: proveedor de IA devolvio error despues de agotar reintentos
+        - status: 504
+          code: AI_PROVIDER_TIMEOUT
+          description: proveedor de IA no respondio dentro del tiempo limite (10s)
+
+  - endpoint: generate_technical_spec
+    method: POST
+    path: /api/v1/specs/technical
+    auth: Bearer Token JWT
+    rate_limit: 20 solicitudes/minuto por usuario
+    max_payload: 50 KB
+    request:
+      - field: feature_name
+        type: string
+        required: true
+        description: nombre corto de la funcionalidad en snake_case
+      - field: product_spec_reference
+        type: string
+        required: true
+        description: referencia (spec_id o path) a la especificacion de producto base
+      - field: system_stack
+        type: enum[python_fastapi, nextjs, flutter, multi_stack]
+        required: true
+        description: stack tecnologico donde se implementara la funcionalidad
+      - field: architecture_pattern
+        type: enum[clean_architecture, hexagonal_architecture]
+        required: true
+        description: patron de arquitectura a seguir en la implementacion
+      - field: repository_context
+        type: string
+        required: false
+        description: informacion sobre la estructura del repositorio existente
+    response:
+      success:
+        status: 201
+        body:
+          - field: spec_id
+            type: string (UUID)
+            description: identificador unico de la especificacion generada
+          - field: feature_name
+            type: string
+            description: nombre de la funcionalidad procesada
+          - field: technical_spec_path
+            type: string
+            description: ruta donde se almaceno la especificacion tecnica
+          - field: normalized_spec_path
+            type: string
+            description: ruta donde se almaceno la especificacion normalizada YAML
+          - field: status
+            type: string
+            description: estado de la generacion (completed)
+          - field: generated_at
+            type: string (ISO 8601)
+            description: timestamp de generacion
+          - field: model_used
+            type: string
+            description: modelo de IA utilizado
+          - field: tokens_used
+            type: integer
+            description: cantidad de tokens consumidos en la generacion
+      errors:
+        - status: 401
+          code: UNAUTHORIZED
+          description: token JWT ausente, invalido o expirado
+        - status: 404
+          code: SPEC_NOT_FOUND
+          description: la especificacion de producto referenciada no existe
+        - status: 413
+          code: PAYLOAD_TOO_LARGE
+          description: tamano de la solicitud excede 50 KB
+        - status: 422
+          code: VALIDATION_ERROR
+          description: campos obligatorios faltantes o valores fuera de los permitidos
+        - status: 429
+          code: RATE_LIMIT_EXCEEDED
+          description: limite de 20 solicitudes por minuto excedido
+        - status: 502
+          code: AI_PROVIDER_ERROR
+          description: proveedor de IA devolvio error despues de agotar reintentos
+        - status: 504
+          code: AI_PROVIDER_TIMEOUT
+          description: proveedor de IA no respondio dentro del tiempo limite (10s)
+
+  - endpoint: get_spec
+    method: GET
+    path: /api/v1/specs/{spec_id}
+    auth: Bearer Token JWT
+    request:
+      - field: spec_id
+        type: string (UUID)
+        required: true
+        description: identificador unico de la especificacion a consultar (path parameter)
+      - field: type
+        type: enum[product, technical, normalized]
+        required: false
+        description: tipo de especificacion a consultar (query parameter, default product)
+    response:
+      success:
+        status: 200
+        body:
+          - field: spec_id
+            type: string (UUID)
+            description: identificador de la especificacion
+          - field: type
+            type: enum[product, technical, normalized]
+            description: tipo de especificacion retornada
+          - field: content
+            type: string
+            description: contenido de la especificacion solicitada
+          - field: metadata
+            type: object
+            description: objeto con generated_at, model_used y tokens_used
+      errors:
+        - status: 401
+          code: UNAUTHORIZED
+          description: token JWT ausente, invalido o expirado
+        - status: 404
+          code: SPEC_NOT_FOUND
+          description: la especificacion solicitada no existe
+        - status: 422
+          code: VALIDATION_ERROR
+          description: spec_id con formato invalido o type no permitido
+
+  - endpoint: health_check
+    method: GET
+    path: /api/v1/specs/health
+    auth: none
+    request: []
+    response:
+      success:
+        status: 200
+        body:
+          - field: status
+            type: string
+            description: estado del servicio (healthy)
+          - field: vertex_ai_status
+            type: string
+            description: estado de la conexion con Vertex AI (connected/disconnected)
+          - field: storage_status
+            type: string
+            description: estado del almacenamiento de specs (available/unavailable)
+      errors:
+        - status: 503
+          code: SERVICE_UNAVAILABLE
+          description: el servicio o alguna dependencia critica no esta disponible
+
+pipeline:
+  phase_1_input_validation:
+    input: request HTTP con datos de la funcionalidad (feature_name, description, contexto, stack, patron)
+    process: |
+      Validar campos obligatorios y tipos de dato usando DTOs Pydantic.
+      Verificar que system_stack y architecture_pattern sean valores del enum permitido.
+      Sanitizar todas las entradas para prevenir prompt injection.
+      Verificar tamano del payload (max 50 KB).
+    output: DTO de entrada validado y sanitizado
+
+  phase_2_model_selection:
+    input: DTO de entrada validado
+    process: |
+      Evaluar complejidad de la funcionalidad segun reglas de negocio:
+      - description > 500 caracteres OR previous_specs_reference presente -> gemini-3.1-pro
+      - description <= 500 caracteres AND sin previous_specs_reference -> gemini-3-flash
+      Configurar parametros del modelo: temperature 0.2, max_tokens 20000.
+    output: modelo seleccionado con configuracion de parametros
+
+  phase_3_prompt_construction:
+    input: DTO validado + modelo seleccionado
+    process: |
+      Construir prompt estructurado con delimitadores de seguridad contra prompt injection.
+      Incluir instrucciones de formato SDD estandarizado.
+      Incorporar contexto de stack y patron de arquitectura seleccionados.
+      Para specs tecnicas: incluir contenido del product spec de referencia.
+    output: prompt listo para enviar al modelo de IA
+
+  phase_4_ai_generation:
+    input: prompt construido + configuracion del modelo
+    process: |
+      Enviar prompt al modelo Vertex AI Gemini seleccionado.
+      Timeout de 10 segundos por solicitud.
+      En caso de fallo: reintentar hasta 2 veces con backoff exponencial.
+      Registrar tokens consumidos y latencia de la solicitud.
+    output: especificacion generada por el modelo de IA
+
+  phase_5_post_processing:
+    input: especificacion generada en texto
+    process: |
+      Validar que la especificacion generada cumple estructura SDD minima.
+      Para specs tecnicas: generar version normalizada en formato YAML.
+      Asignar spec_id unico (UUID v4).
+    output: especificacion validada con spec_id asignado
+
+  phase_6_storage:
+    input: especificacion validada con spec_id
+    process: |
+      Almacenar especificacion en filesystem bajo directorio /specs/{feature_name}/.
+      Estructura de archivos:
+        /specs/{feature_name}/{spec_id}/product_spec.md (para producto)
+        /specs/{feature_name}/{spec_id}/technical_spec.md (para tecnica)
+        /specs/{feature_name}/{spec_id}/normalized_spec.yaml (para normalizada)
+        /specs/{feature_name}/{spec_id}/metadata.json (metadatos de generacion)
+    output: rutas de archivos almacenados
+
+  phase_7_response:
+    input: rutas de almacenamiento + metadatos
+    process: |
+      Construir respuesta HTTP con spec_id, rutas de archivos, modelo usado,
+      tokens consumidos y timestamp de generacion.
+    output: respuesta HTTP 201 con datos de la especificacion generada
+
+dependencies:
+  - VertexAI SDK (google-cloud-aiplatform): cliente para invocar modelos Gemini 3.1 Pro y Gemini 3 Flash en Vertex AI
+  - Filesystem (pathlib/os): almacenamiento de especificaciones en directorio /specs/
+  - Auth Service (JWT): validacion de tokens JWT para autenticacion de usuarios
+  - Rate Limiter (slowapi o custom): control de tasa de 20 solicitudes/minuto por usuario
+  - Pydantic v2: validacion de input DTOs y schemas de request/response
+  - UUID generator: generacion de identificadores unicos para especificaciones
+  - Logging (LoggerService): registro de solicitudes, latencias, errores y tokens consumidos
+  - Doppler: gestion de secretos de aplicacion (API keys, configuracion de Vertex AI)
+  - Prometheus metrics: metricas de latencia p95, tasa de errores, tokens consumidos

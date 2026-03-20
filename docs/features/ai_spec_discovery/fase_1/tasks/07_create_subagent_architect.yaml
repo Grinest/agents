@@ -1,0 +1,79 @@
+# tasks/07_create_subagent_architect.yaml
+task: create_subagent_architect
+level: L3
+parent: technical.yaml
+status: PENDING
+phase: "3 - Subagents"
+
+scope: |
+  Crear el subagent @architect de Gemini CLI que genera especificaciones
+  tecnicas (technical.yaml) en formato SDD estandarizado a partir de un
+  feature.yaml existente y las escribe a disco via write_file.
+  El archivo debe incluir frontmatter YAML con configuracion del subagent
+  (name, description, kind, tools, model, temperature, max_turns) y un
+  system prompt adaptado del agente architect de Claude Code (Flujo A).
+  El system prompt debe incluir @imports de convenciones por stack,
+  schema de output y ejemplo de referencia.
+  Adaptar el prompt para Gemini CLI: reemplazar referencias a herramientas
+  de Claude Code por tools de Gemini CLI (read_file, write_file, grep_search,
+  list_directory).
+  IMPORTANTE: El system prompt debe implementar dos optimizaciones clave:
+  1) Single prompt first - si el usuario proporciona path al feature.yaml,
+     stack, repo local y ruta destino en un solo mensaje, generar directamente
+  2) Escritura a disco - usar write_file para escribir el technical.yaml
+  El subagent debe leer el feature.yaml del disco (generado por @product)
+  y opcionalmente explorar un repositorio local.
+  Solo adaptar Flujo A (feature.yaml -> technical.yaml). Flujo B (tasks)
+  queda fuera de scope para Fase 1.
+
+files_to_create:
+  - gemini/spec-generator/.gemini/agents/architect.md
+
+patterns:
+  - frontmatter:
+      name: architect
+      description: "Genera especificaciones tecnicas (technical.yaml) en formato SDD a partir de un feature.yaml existente y las escribe a disco"
+      kind: local
+      tools: [read_file, write_file, grep_search, list_directory]
+      model: gemini-2.5-pro
+      temperature: 0.3
+      max_turns: 20
+  - system_prompt: adaptado de plugins/general/agents/architect.md (solo Flujo A)
+  - imports: "@conventions-backend-py.md, @conventions-frontend-nextjs.md, @conventions-mobile-flutter.md, @schema-technical.yaml, @example-technical.yaml"
+  - idioma_specs: espanol para contenido de specs generadas
+  - single_prompt_first: si el usuario proporciona path feature.yaml, stack, repo local y ruta destino, generar en 1 turno
+  - fallback_conversacional: solo preguntar si falta path al feature.yaml o stack
+  - lectura_feature_yaml: usar read_file para leer el feature.yaml generado por @product desde disco
+  - exploracion_repo: usar read_file, grep_search y list_directory para explorar repo local
+  - escritura_disco: usar write_file para escribir technical.yaml en la ruta indicada
+  - campos_condicionales: api_contract solo si layer=api, data_model solo si hay persistencia
+  - flujo_optimizado: read_file feature.yaml -> [preguntar solo si falta critico] -> explorar repo (si indicado) -> generar -> write_file
+
+acceptance:
+  - archivo tiene frontmatter YAML valido con todos los campos requeridos
+  - frontmatter incluye write_file y list_directory en tools
+  - system prompt incluye @imports de las 3 convenciones, schema y ejemplo
+  - system prompt implementa single prompt first
+  - system prompt instruye a leer feature.yaml via read_file y escribir technical.yaml via write_file
+  - system prompt define flujo: read_file feature.yaml -> [preguntar si falta stack] -> explorar repo -> generar -> write_file
+  - system prompt documenta reglas de campos condicionales (api_contract, data_model, pipeline)
+  - NO contiene Flujo B (generacion de tasks) - solo Flujo A
+  - NO contiene referencias a herramientas de Claude Code
+  - el subagent se puede invocar con @architect en Gemini CLI sin errores de carga
+  - tamano estimado: 300-400 lineas
+
+context_files:
+  - plugins/general/agents/architect.md
+  - gemini/spec-generator/conventions-backend-py.md
+  - gemini/spec-generator/conventions-frontend-nextjs.md
+  - gemini/spec-generator/conventions-mobile-flutter.md
+  - gemini/spec-generator/schema-technical.yaml
+  - gemini/spec-generator/example-technical.yaml
+  - docs/features/ai_spec_discovery/fase_1/technical-proposal.md
+
+depends_on:
+  - 01_create_schemas
+  - 02_create_examples
+  - 03_extract_conventions_backend_py
+  - 04_extract_conventions_frontend_nextjs
+  - 05_extract_conventions_mobile_flutter

@@ -1,0 +1,46 @@
+# tasks/05_extract_conventions_mobile_flutter.yaml
+task: extract_conventions_mobile_flutter
+level: L3
+parent: technical.yaml
+status: PENDING
+phase: "2 - Convenciones por Stack"
+
+scope: |
+  Extraer las convenciones de desarrollo Flutter del agente mobile-flutter
+  de Claude Code a un archivo modular .md que los subagents de Gemini CLI
+  puedan importar via @conventions-mobile-flutter.md.
+  Incluir SOLO las secciones relevantes para generacion de specs (arquitectura,
+  patrones, anti-patrones, decisiones criticas). NO incluir secciones de
+  workflow de desarrollo, ejemplos de codigo extensos, ni contexto especifico.
+  El archivo debe ser autocontenido y no depender de otros archivos importados.
+
+files_to_create:
+  - gemini/spec-generator/conventions-mobile-flutter.md
+
+patterns:
+  - fuente: plugins/flutter-development/agents/mobile-flutter.md
+  - secciones_incluir: Technology Stack Expertise (resumido), Architecture Understanding (estructura carpetas), Key Architectural Patterns (BLoC, Freezed, Result, feature-based, get_it), 5 decisiones criticas, Anti-Patterns
+  - secciones_parciales: Quality Criteria (solo reglas que impactan specs), Testing Strategy (solo estrategia general)
+  - secciones_excluir: SOLID Principles (generico), Development Workflow (no relevante), Code examples (no generar codigo), Current Project Context (especifico)
+  - formato: markdown con headers claros, listas descriptivas, sin bloques de codigo extensos
+  - patron_clave_1: Clean Architecture 4 capas (domain, application, infrastructure, presentation)
+  - patron_clave_2: BLoC pattern con Freezed para state management
+  - patron_clave_3: Result<T> pattern para manejo de errores
+  - patron_clave_4: Feature-based modularization (cada feature es un modulo independiente)
+  - patron_clave_5: get_it para dependency injection
+  - decisiones_criticas: las 5 decisiones criticas de arquitectura documentadas en el agente original
+
+acceptance:
+  - archivo incluye estructura de carpetas Clean Architecture 4 capas
+  - archivo documenta BLoC + Freezed pattern
+  - archivo documenta Result<T> pattern
+  - archivo documenta feature-based modularization
+  - archivo incluye las 5 decisiones criticas de arquitectura
+  - archivo documenta anti-patrones prohibidos
+  - archivo NO contiene ejemplos de codigo extensos
+  - archivo es autocontenido
+  - tamano estimado: 150-200 lineas
+
+context_files:
+  - plugins/flutter-development/agents/mobile-flutter.md
+  - docs/features/ai_spec_discovery/fase_1/technical-proposal.md
