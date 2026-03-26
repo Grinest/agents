@@ -55,7 +55,7 @@ jobs:
           chmod +x .agents-marketplace/scripts/code-review.sh
           .agents-marketplace/scripts/code-review.sh \
             --agent .agents-marketplace/plugins/python-development/agents/reviewer-library-py.md \
-            --model claude-opus-4-20250514 \
+            --model claude-sonnet-4-20250514 \
             --arch-threshold 7 \
             --quality-threshold 7 \
             --test-threshold 8

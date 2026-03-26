@@ -32,7 +32,7 @@ set -euo pipefail
 # Default configuration
 # =============================================================================
 AGENT_FILE=""
-MODEL="claude-opus-4-20250514"
+MODEL="claude-sonnet-4-20250514"
 ARCH_THRESHOLD=7
 QUALITY_THRESHOLD=7
 TEST_THRESHOLD=8
@@ -395,7 +395,7 @@ EOF
   echo '```' >> user_prompt.txt
   echo "" >> user_prompt.txt
 
-  # Previous review context LAST (scores only, no action items to avoid bias)
+  # Previous review context LAST (scores + action items + key issues)
   if [[ "${REVIEW_COUNT}" -gt 0 ]]; then
     cat >> user_prompt.txt <<EOF
 
@@ -406,7 +406,31 @@ EOF
 - **Previous Review Date**: ${LAST_REVIEW_DATE}
 - **Previous Metrics**: Architecture: ${LAST_ARCH}/10, Code Quality: ${LAST_QUALITY}/10, Testing: ${LAST_TEST}/10
 
-**IMPORTANT**: Evaluate the code FRESH based on the Final File Contents above. Do not assume issues from previous reviews still exist. Only report issues you can verify in the current code.
+EOF
+
+    # Include previous action items and key issues
+    echo "### Previous Review Feedback" >> user_prompt.txt
+    echo "" >> user_prompt.txt
+
+    if [[ -f last_review_body.txt ]]; then
+      # Extract Action Items section
+      if grep -q "Action Items" last_review_body.txt; then
+        echo "**Previous Action Items:**" >> user_prompt.txt
+        sed -n '/Action Items/,/^---$/p' last_review_body.txt | head -80 >> user_prompt.txt
+        echo "" >> user_prompt.txt
+      fi
+
+      # Extract key issues from previous review
+      echo "**Key Issues from Previous Review:**" >> user_prompt.txt
+      grep -A 3 '❌\|⚠️\|Issues Found\|Must Fix\|CRITICAL\|NOT ADDRESSED' last_review_body.txt | head -100 >> user_prompt.txt || echo "No critical issues in previous review" >> user_prompt.txt
+      echo "" >> user_prompt.txt
+    fi
+
+    cat >> user_prompt.txt <<EOF
+
+**IMPORTANT**: Review the previous feedback above. Verify each previous action item against
+the Final File Contents to determine if it was addressed. Track persistent issues across reviews.
+Only report issues you can verify in the current code.
 
 ---
 
