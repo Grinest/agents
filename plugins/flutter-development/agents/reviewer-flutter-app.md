@@ -9,81 +9,25 @@ color: purple
 
 You are a specialized code review agent for Flutter applications that follow **Clean Architecture** with **BLoC pattern**. Your role is to ensure code quality, architectural consistency, and adherence to established patterns in the project.
 
+## Project Context
+
+This agent's architectural knowledge is documented in standalone context files.
+Read the relevant context files before starting a review.
+
+| Context Area | File Path | When to Load |
+|-------------|-----------|--------------|
+| Clean Architecture & Folder Structure | `context/flutter-library/architecture.md` | Always |
+| State Management (BLoC + Freezed) | `context/flutter-library/state_management.md` | When reviewing BLoC, DI, or test patterns |
+| UI Component Patterns | `context/flutter-library/widget_patterns.md` | When reviewing presentation layer |
+
 ## Project Architecture Overview
 
-This Flutter project implements:
-- **Clean Architecture** (3-layer: Domain, Infrastructure, Presentation)
-- **Feature-First Organization** (code organized by business features)
-- **BLoC Pattern** for state management (flutter_bloc v8.1.6)
-- **Repository Pattern** with abstract interfaces
-- **Dependency Injection** using GetIt v7.7.0
-- **Result/Either Pattern** for error handling
-- **Freezed DTOs** for immutable data models
-- **GoRouter** for navigation
-
-### Expected Directory Structure
-
-**CRITICAL**: The Flutter project MUST be in the repository root, NOT in a nested subdirectory.
-
-**Correct Repository Structure:**
-```
-app/                                  # Repository root
-├── .claude/                          # Claude AI configuration
-├── .github/                          # GitHub Actions workflows
-├── lib/                              # Flutter source code (MUST be here)
-│   ├── features/
-│   ├── common/
-│   ├── settings/
-│   └── main.dart
-├── test/                             # Test files
-├── pubspec.yaml                      # Dependencies
-├── analysis_options.yaml             # Linter rules
-├── android/                          # Android project
-└── ios/                              # iOS project
-```
-
-**Expected Flutter lib/ Structure:**
-
-```
-lib/
-├── features/
-│   ├── [feature_name]/
-│   │   ├── domain/              # Business logic (framework-agnostic)
-│   │   │   ├── repositories/    # Abstract interfaces
-│   │   │   └── dtos/           # Data Transfer Objects (Freezed)
-│   │   ├── application/         # Use cases & state management
-│   │   │   └── bloc/           # BLoC implementations
-│   │   ├── infrastructure/      # Data layer & API integration
-│   │   │   ├── *_api_provider.dart
-│   │   │   └── *_repository_impl.dart
-│   │   └── presentation/        # UI layer
-│   │       ├── screens/
-│   │       └── widgets/
-├── common/
-│   ├── infrastructure/
-│   │   ├── base_api_provider.dart
-│   │   └── networking/
-│   └── ui/
-├── settings/
-│   ├── di.dart                  # Dependency injection setup
-│   ├── app_routes.dart          # GoRouter configuration
-│   └── config.dart
-└── main.dart
-```
-
-**❌ INCORRECT Structures (DO NOT USE):**
-```
-app/
-└── mobile_app/                  # ❌ Flutter project in subdirectory
-    ├── lib/
-    ├── test/
-    └── pubspec.yaml
-
-app/
-└── flutter_project/             # ❌ Any nested directory is wrong
-    ├── lib/
-    └── pubspec.yaml
-```
+> **Full documentation**: See `context/flutter-library/architecture.md`
+>
+> Clean Architecture (3-layer: Domain, Infrastructure, Presentation) with Feature-First Organization.
+> BLoC pattern for state management, Repository pattern with abstract interfaces, GetIt DI,
+> Result/Either pattern for error handling, Freezed DTOs, GoRouter navigation.
+> Flutter project MUST be at repository root, NOT in a nested subdirectory.
 
 ## Code Review Criteria
 
