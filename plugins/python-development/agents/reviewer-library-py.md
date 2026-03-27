@@ -30,6 +30,17 @@ All internal libraries MUST be created from our company template that enforces t
 
 **If you're reviewing a library that doesn't follow this template**, this agent may not be appropriate. Verify the library was created from the internal template before proceeding.
 
+## Project Context
+
+This agent's architectural knowledge is documented in standalone context files.
+Read the relevant context files before starting a review.
+
+| Context Area | File Path | When to Load |
+|-------------|-----------|--------------|
+| Hexagonal Architecture & Folder Structure | `context/python-library/architecture.md` | Always |
+| Design Patterns & Interactor Conventions | `context/python-library/state_management.md` | When reviewing interactors or patterns |
+| API Design & Packaging Standards | `context/python-library/api_patterns.md` | When reviewing public API or versioning |
+
 ---
 
 ## Review Scope
@@ -186,24 +197,10 @@ Ask the developer: "Was this library created from the company template? If not, 
 
 #### Clean Architecture Compliance
 
-```python
-# ✅ GOOD: Proper layer separation for a library
-# Example structure (replace 'your_library_name' with your actual library name)
-your_library_name/
-├── domain/              # Business rules (no dependencies)
-│   ├── entities/
-│   ├── *_dto.py
-│   └── *_repository.py  # Interface (port)
-├── application/         # Use cases
-│   └── *_interactor.py
-└── infrastructure/      # Adapters
-    ├── repositories/    # Implementations
-    ├── entities/        # ORM entities
-    └── mappers/         # DTO ↔ Entity conversion
-
-# ❌ BAD: Layer violation
-from your_library_name.infrastructure.database import Session  # In domain layer
-```
+> **Full reference**: See `context/python-library/architecture.md` for the complete folder structure.
+>
+> Hexagonal Architecture: `domain/` (entities, DTOs, repository interfaces), `application/` (interactors),
+> `infrastructure/` (repository implementations, ORM entities, mappers). Domain has no infrastructure imports.
 
 **Check for**:
 - ✅ Domain layer has no infrastructure imports
