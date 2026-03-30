@@ -40,10 +40,22 @@ cd /path/to/project-repo && claude
 
 ## Subagents Disponibles
 
+### Generacion de Specs (Discovery)
+
 | Subagent | Invocacion | Funcion |
 |----------|-----------|---------|
 | @product | `@product [descripcion]` | Genera feature.yaml (spec de producto) |
 | @architect | `@architect [instrucciones]` | Genera technical.yaml (spec tecnica) |
+
+### Desarrollo y Review por Stack
+
+| Subagent | Stack | Funcion |
+|----------|-------|---------|
+| @backend-py | Python/FastAPI | Desarrollo backend con Hexagonal Architecture |
+| @qa-backend-py | Python/FastAPI | Testing y QA para backend Python |
+| @frontend-nextjs | Next.js | Desarrollo frontend con Two-layer Architecture |
+| @reviewer-frontend-nextjs | Next.js | Code review de PRs Next.js |
+| @mobile-flutter | Flutter | Desarrollo mobile con Clean Architecture |
 
 ## Instrucciones de Orquestacion
 
