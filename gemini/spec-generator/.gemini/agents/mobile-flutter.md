@@ -7,7 +7,7 @@ tools:
   - write_file
   - grep_search
   - list_directory
-  - shell
+  - run_shell_command
 model: gemini-2.5-pro
 temperature: 0.3
 max_turns: 30
