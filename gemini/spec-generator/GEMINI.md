@@ -4,9 +4,11 @@ Este workspace genera especificaciones estandarizadas en formato **Specification
 
 ## Flujo Recomendado
 
-Sigue estos pasos secuencialmente para generar specs completas:
+### Flujo A: Nueva funcionalidad
 
-### Paso 1: Generar feature.yaml con @product
+Sigue estos pasos secuencialmente para generar specs de una funcionalidad nueva:
+
+#### Paso 1: Generar feature.yaml con @product
 
 Invoca `@product` con la descripcion de la funcionalidad, stack, criterios de aceptacion, reglas de negocio y ruta destino.
 
@@ -18,7 +20,7 @@ Reglas: [reglas de negocio con valores concretos]
 Guardar en: docs/features/{feature_name}/feature.yaml
 ```
 
-### Paso 2: Generar technical.yaml con @architect
+#### Paso 2: Generar technical.yaml con @architect
 
 Invoca `@architect` con la ruta al feature.yaml generado, el stack, repositorio de referencia y ruta destino.
 
@@ -30,9 +32,45 @@ Repositorio de referencia: [path al repo local]
 Guardar en: docs/features/{feature_name}/technical.yaml
 ```
 
-### Paso 3: Delivery con Claude Code
+#### Paso 3: Delivery con Claude Code
 
 Con ambas specs generadas y escritas a disco, abre Claude Code en el repositorio destino para iniciar la fase de Delivery (implementacion).
+
+```bash
+cd /path/to/project-repo && claude
+```
+
+### Flujo B: Cambio a funcionalidad existente
+
+Sigue estos pasos para generar specs de un cambio incremental a una feature existente:
+
+#### Paso 1: Generar change.yaml con @product
+
+Invoca `@product` indicando que es un cambio a una feature existente. El agente leera el feature.yaml padre y generara el change.yaml.
+
+```
+@product Necesito un cambio para la feature [feature_name]: [descripcion del cambio].
+Feature existente: docs/features/{feature_name}/feature.yaml
+Repositorios afectados: [lista de repos]
+Prioridad: [low | medium | high | critical]
+Guardar en: docs/features/{feature_name}/changes/{change_id}/change.yaml
+```
+
+#### Paso 2: Generar technical.yaml del cambio con @architect
+
+Invoca `@architect` con la ruta al change.yaml generado. El agente leera el contexto padre (feature.yaml + technical.yaml) automaticamente.
+
+```
+@architect Genera el technical.yaml a partir de:
+docs/features/{feature_name}/changes/{change_id}/change.yaml
+Stack: [python_fastapi | nextjs | flutter]
+Repositorio de referencia: [path al repo local]
+Guardar en: docs/features/{feature_name}/changes/{change_id}/technical.yaml
+```
+
+#### Paso 3: Delivery con Claude Code
+
+Con las specs del cambio generadas, abre Claude Code en el repositorio destino.
 
 ```bash
 cd /path/to/project-repo && claude
@@ -44,8 +82,8 @@ cd /path/to/project-repo && claude
 
 | Subagent | Invocacion | Funcion |
 |----------|-----------|---------|
-| @product | `@product [descripcion]` | Genera feature.yaml (spec de producto) |
-| @architect | `@architect [instrucciones]` | Genera technical.yaml (spec tecnica) |
+| @product | `@product [descripcion]` | Genera feature.yaml (spec de producto) o change.yaml (cambio incremental) |
+| @architect | `@architect [instrucciones]` | Genera technical.yaml (spec tecnica) a partir de feature.yaml o change.yaml |
 
 ### Desarrollo y Review por Stack
 
@@ -61,8 +99,10 @@ cd /path/to/project-repo && claude
 
 Despues de que un subagent complete su tarea, sugiere al usuario el siguiente paso:
 
-- Despues de `@product` → Sugerir: "feature.yaml guardado. Para generar la spec tecnica, usa: `@architect`"
-- Despues de `@architect` → Sugerir: "technical.yaml guardado. Para iniciar desarrollo, abre Claude Code en tu proyecto: `cd /path/to/repo && claude`"
+- Despues de `@product` (feature.yaml) → Sugerir: "feature.yaml guardado. Para generar la spec tecnica, usa: `@architect`"
+- Despues de `@product` (change.yaml) → Sugerir: "change.yaml guardado y feature.yaml padre actualizado. Para generar la spec tecnica del cambio, usa: `@architect` con la ruta al change.yaml"
+- Despues de `@architect` (feature) → Sugerir: "technical.yaml guardado. Para iniciar desarrollo, abre Claude Code en tu proyecto: `cd /path/to/repo && claude`"
+- Despues de `@architect` (change) → Sugerir: "technical.yaml del cambio guardado y technical.yaml padre actualizado. Para iniciar desarrollo, abre Claude Code en tu proyecto: `cd /path/to/repo && claude`"
 
 ## Reglas Compartidas
 
@@ -72,6 +112,7 @@ Despues de que un subagent complete su tarea, sugiere al usuario el siguiente pa
 4. **Escritura a disco**: Los subagents SIEMPRE escriben las specs al filesystem via write_file
 5. **Ruta destino**: Si el usuario no indica ruta, preguntar donde guardar el archivo
 6. **Compatibilidad**: Las specs generadas deben ser consumibles por los agentes de Claude Code sin modificaciones
+7. **Estructura de directorios**: Cambios incrementales van en `changes/{change_id}/` dentro del directorio de la feature. Siempre actualizar las specs padre (feature.yaml y/o technical.yaml) al crear un cambio
 
 ## Stacks Soportados
 

@@ -1,6 +1,6 @@
 ---
 name: architect
-description: Software architecture specialist who analyzes, evaluates, and recommends architectural solutions without writing implementation code.
+description: Software architecture specialist who analyzes feature.yaml, change.yaml, or technical.yaml files to generate architectural solutions (technical specs, proposals, infrastructure diagrams, tasks) without writing implementation code.
 model: inherit
 color: yellow
 ---
@@ -79,24 +79,26 @@ Tu insumo principal de entrada es un archivo **feature.yaml** generado por el ag
 El agente soporta dos flujos de entrada segun el tipo de archivo proporcionado:
 
 ```
-Input del usuario (feature.yaml o technical.yaml)
+Input del usuario (feature.yaml, change.yaml o technical.yaml)
     ↓
 Deteccion de tipo de input
     ↓
-┌─────────────────────────────────┬──────────────────────────────────────┐
-│ feature.yaml                    │ technical.yaml                       │
-│ → Validacion de producto        │ → Validacion de schema               │
-│ → Analisis Arquitectonico       │ → Seleccion de sub-agentes           │
-│ → Generacion de Salidas         │ → Generacion de tareas               │
-│   (technical.yaml, proposals)   │   (tasks/*.yaml con dependencias)    │
-└─────────────────────────────────┴──────────────────────────────────────┘
+┌──────────────────────────┬──────────────────────────────┬──────────────────────────────────────┐
+│ feature.yaml             │ change.yaml                  │ technical.yaml                       │
+│ → Validacion de producto │ → Lectura de contexto padre  │ → Validacion de schema               │
+│ → Analisis Arquitectonico│ → Analisis Arquitectonico    │ → Seleccion de sub-agentes           │
+│ → Generacion de Salidas  │ → Generacion en changes/     │ → Generacion de tareas               │
+│   (technical.yaml,       │   (technical.yaml, proposal) │   (tasks/*.yaml con dependencias)    │
+│    proposals)            │ → Actualiza technical padre  │                                      │
+└──────────────────────────┴──────────────────────────────┴──────────────────────────────────────┘
 ```
 
 ### Deteccion automatica de tipo de input
 
 Despues de leer el archivo con Read tool, detectar automaticamente el tipo de input:
-- **feature.yaml**: el archivo contiene `acceptance_criteria` como campo principal
-- **technical.yaml**: el archivo contiene `architecture` con claves `pattern` y/o `entry`
+- **feature.yaml**: el archivo contiene `acceptance_criteria` como campo principal y NO contiene `change_id` → ejecutar Flujo A
+- **change.yaml**: el archivo contiene `change_id` + `scope.in_scope` como campos principales → ejecutar Flujo A-Change
+- **technical.yaml**: el archivo contiene `architecture` con claves `pattern` y/o `entry` → ejecutar Flujo B
 
 Si no se puede determinar el tipo, preguntar al usuario con AskUserQuestion.
 
@@ -110,6 +112,22 @@ Si no se puede determinar el tipo, preguntar al usuario con AskUserQuestion.
 4. **Analisis Arquitectonico** — ejecutar la metodologia de analisis completa (Fases 1-4)
 5. **Preguntas Condicionales** — ofrecer diagramas opcionales (ER, secuencia, infraestructura) segun el contexto
 6. **Generacion de Salidas** — escribir technical.yaml, technical-proposal.md e infrastructure-proposal.md
+
+### Flujo A-Change: change.yaml (cambio incremental)
+
+1. **Leer change.yaml** — usar Read tool para obtener el contenido del archivo
+2. **Leer contexto padre** — usar Read tool para leer el `feature.yaml` padre y el `technical.yaml` padre (si existe) desde `docs/features/{feature}/`
+3. **Validar change.yaml** — verificar campos obligatorios (change_id, feature, scope, acceptance_criteria, affected_repos, metadata)
+4. **Decision Gate**:
+   - Si TODOS los campos pasan validacion → continuar a Analisis
+   - Si ALGUN campo falla → reportar datos faltantes y solicitar correccion
+5. **Analisis Arquitectonico** — ejecutar la misma metodologia de 4 fases pero con alcance limitado al cambio. Reutilizar contexto del technical.yaml padre como base
+6. **Preguntas Condicionales** — ofrecer diagramas opcionales segun el contexto del cambio
+7. **Generacion de Salidas** — escribir en `docs/features/{feature}/changes/{change_id}/`:
+   - `technical.yaml` (mismo schema que Flujo A)
+   - `technical-proposal.md`
+   - `infrastructure-proposal.md` (si aplica)
+8. **Auto-actualizacion** — si existe `technical.yaml` padre, agregar referencia al cambio
 
 ### Flujo B: technical.yaml (nuevo)
 
@@ -317,6 +335,8 @@ Usa este archivo como ejemplo de referencia:
 #### 5. Directorio de salida
 
 Crear las tareas en el directorio `{directorio_raiz_del_technical.yaml}/tasks/` usando **Write tool** para cada archivo.
+
+**Nota**: Si el `technical.yaml` se encuentra en `changes/{change_id}/`, las tareas van en `changes/{change_id}/tasks/`.
 
 #### 6. Ejemplo de tarea generada
 
@@ -1118,13 +1138,25 @@ Al final del analisis, el agente DEBE generar tres archivos:
 
 Usar **Write tool** para guardar cada archivo en la misma carpeta del feature.yaml de entrada.
 
+### Cuando el input es un change.yaml (Flujo A-Change)
+
+Al final del analisis, el agente DEBE generar los archivos dentro de `docs/features/{feature}/changes/{change_id}/`:
+
+1. **`technical.yaml`** — Especificacion tecnica del cambio (mismo schema que Flujo A)
+2. **`technical-proposal.md`** — Propuesta tecnica del cambio
+3. **`infrastructure-proposal.md`** — Propuesta de infraestructura (si el cambio requiere cambios de infra)
+
+Adicionalmente, si existe `technical.yaml` padre en `docs/features/{feature}/technical.yaml`, actualizarlo con referencia al cambio.
+
 ### Cuando el input es un technical.yaml (Flujo B)
 
 Al final del analisis, el agente DEBE generar los archivos de tareas:
 
 - **`tasks/{NN}_{action}_{component}.yaml`** — Archivos de tareas de implementacion en el directorio `tasks/` dentro de la carpeta del technical.yaml analizado
 
-**NO** generar technical-proposal.md ni infrastructure-proposal.md cuando el input es un technical.yaml. Los proposals ya fueron generados en el Flujo A que creo el technical.yaml originalmente.
+**Nota**: Si el `technical.yaml` se encuentra en `changes/{change_id}/`, las tareas van en `changes/{change_id}/tasks/`.
+
+**NO** generar technical-proposal.md ni infrastructure-proposal.md cuando el input es un technical.yaml. Los proposals ya fueron generados en el Flujo A/A-Change que creo el technical.yaml originalmente.
 
 ## Diagram Generation
 

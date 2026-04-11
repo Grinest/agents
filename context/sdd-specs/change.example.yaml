@@ -1,0 +1,61 @@
+# change.yaml — Ejemplo de referencia
+# Tema: Importacion masiva de movimientos para sistema de gestion de inventario
+# Este ejemplo es un cambio incremental a la feature warehouse_inventory_management
+
+change_id: v1-bulk-import
+feature: warehouse_inventory_management
+
+title: Importacion masiva de movimientos de inventario via archivo CSV
+
+status: planned
+
+scope:
+  description: |
+    Permitir al administrador de almacen importar movimientos de inventario
+    de forma masiva mediante la carga de un archivo CSV, en lugar de registrar
+    cada movimiento individualmente. Esto reduce el tiempo de operacion
+    cuando se reciben lotes grandes de mercancia o se realizan ajustes masivos.
+  in_scope:
+    - Carga de archivo CSV con movimientos de inventario
+    - Validacion de formato y estructura del archivo CSV
+    - Validacion de datos por fila (producto existente, bodega valida, cantidad positiva)
+    - Registro masivo de movimientos en el sistema
+    - Reporte detallado de filas procesadas exitosamente y filas con error
+    - Actualizacion automatica del stock por cada movimiento procesado
+  out_of_scope:
+    - Exportacion de movimientos a CSV
+    - Soporte de formatos distintos a CSV (Excel, JSON, XML)
+    - Programacion de importaciones automaticas o periodicas
+    - Importacion de productos nuevos al catalogo
+
+acceptance_criteria:
+  - El administrador puede cargar un archivo CSV desde la interfaz del sistema
+  - El sistema valida que el archivo tenga el formato CSV esperado antes de procesar
+  - El sistema valida cada fila del archivo y rechaza las filas con datos invalidos sin detener el proceso
+  - El sistema registra los movimientos validos y actualiza el stock correspondiente
+  - El sistema muestra un reporte con el total de filas procesadas, exitosas y con error
+  - El sistema rechaza archivos que excedan las 1000 filas por operacion
+  - El sistema genera alertas de stock bajo si alguna salida procesada deja el stock por debajo del minimo
+
+dependencies:
+  features:
+    - feature: warehouse_inventory_management
+      status: completed
+  external:
+    - Servicio de almacenamiento temporal de archivos para procesamiento
+
+risks:
+  - description: Archivos CSV con formato incorrecto podrian generar movimientos erroneos en el inventario
+    mitigation: Validacion estricta de formato y datos por fila antes de registrar cualquier movimiento
+  - description: Importaciones de archivos grandes podrian afectar el rendimiento del sistema
+    mitigation: Limite de 1000 filas por operacion y procesamiento en segundo plano para archivos grandes
+
+affected_repos:
+  - warehouse-api
+  - warehouse-web
+
+metadata:
+  created_by: product_owner
+  created_at: "2025-01-15"
+  target_date: "2025-02-15"
+  priority: high
