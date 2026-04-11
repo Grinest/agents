@@ -1,0 +1,41 @@
+# task.yaml — Ejemplo de referencia
+# Tema: Sistema de gestion de inventario para almacenes
+# Tarea: Creacion de la estructura de persistencia (Tabla de Movimientos)
+
+task: create_inventory_movements_table
+id: TASK-001
+level: L2
+parent: technical.yaml
+status: PENDING
+phase: "1 - Foundation"
+depends_on: []
+
+scope: |
+  Implementar la migracion de base de datos para crear la tabla `inventory_movements`
+  segun la definicion del modelo de datos en el technical.yaml.
+  La tabla debe incluir todas las constraints de integridad y los indices optimizados
+  para las consultas de historial.
+
+assigned_subagent: "python-development:backend-py"
+
+files_to_create:
+  - alembic/versions/xxxx_create_inventory_movements_table.py
+  - app/infrastructure/models/inventory_movement.py
+
+patterns:
+  - Usar SQLAlchemy 2.0 Declarative Mapping
+  - Migraciones gestionadas via Alembic
+  - Seguir convenciones de naming de indices del proyecto
+
+acceptance:
+  - La migracion se genera y ejecuta exitosamente en el entorno local
+  - El modelo de datos refleja fielmente los campos definidos en technical.yaml
+  - Existen indices para (producto_id, bodega_id)
+
+context_files:
+  - technical.yaml
+  - context/python-api/architecture.md
+
+estimated_effort: small
+stack: python_fastapi
+source_file: technical.yaml

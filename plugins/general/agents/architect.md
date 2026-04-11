@@ -274,7 +274,12 @@ Organizar las tareas en componentes para identificar dependencias cruzadas y per
 
 #### 3. Formato de archivo de tarea
 
-Cada tarea se escribe como un archivo YAML independiente con nomenclatura `{NN}_{action}_{component}.yaml`.
+Cada tarea se escribe como un archivo YAML independiente con nomenclatura `{NN}_{action}_{component}.yaml`. El contenido debe seguir estrictamente el esquema definido en:
+
+**context/sdd-specs/task.schema.yaml**
+
+Usa este archivo como ejemplo de referencia:
+`context/sdd-specs/task.example.yaml`
 
 **Campos obligatorios:**
 
@@ -1097,7 +1102,7 @@ dependencies:
 
 ### Ruta de salida
 
-Usar **Write tool** para guardar el archivo en: `docs/features/[feature_name]/technical.yaml`
+Usar **Write tool** para guardar el archivo en: `docs/features/[feature_name]/technical.yaml`. El archivo generado debe cumplir estrictamente con el esquema definido en `context/sdd-specs/technical.schema.yaml`.
 
 ## Mandatory Output Files
 

@@ -4,6 +4,11 @@
 **Author**: Architecture Team
 **Status**: Draft
 
+> **NOTA**: La estructura de directorios descrita en esta propuesta fue superada.
+> Los schemas y ejemplos se centralizaron de `gemini/spec-generator/{schema,example}-*.yaml`
+> a `context/sdd-specs/*.{schema,example}.yaml`. La sintaxis `@import` fue reemplazada
+> por instrucciones explícitas de `read_file`. Ver commit bdec947.
+
 ---
 
 ## 1. Solution Overview

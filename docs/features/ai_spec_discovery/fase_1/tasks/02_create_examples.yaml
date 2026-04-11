@@ -2,7 +2,7 @@
 task: create_output_examples
 level: L2
 parent: technical.yaml
-status: PENDING
+status: COMPLETED
 phase: "1 - Schemas y Ejemplos"
 
 scope: |
