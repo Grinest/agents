@@ -564,11 +564,11 @@ Organizar las tareas en componentes para identificar dependencias cruzadas y per
 
 #### 3. Formato de archivo de tarea
 
-Cada tarea se escribe como un archivo YAML independiente con nomenclatura `{NN}_{action}_{component}.yaml`. El contenido debe seguir estrictamente el esquema definido en:
+Cada tarea se escribe como un archivo YAML independiente con nomenclatura `{NN}_{action}_{component}.yaml`. El contenido debe seguir estrictamente el esquema definido en (usar `read_file` para leer el archivo):
 
-**context/sdd-specs/task.schema.yaml**
+**`context/sdd-specs/task.schema.yaml`**
 
-Usa este archivo como ejemplo de referencia:
+Usa este archivo como ejemplo de referencia (usar `read_file` para leer el archivo):
 `context/sdd-specs/task.example.yaml`
 
 **Campos obligatorios:**
@@ -695,15 +695,15 @@ Usar `read_file` para leer SOLO los archivos del stack indicado por el usuario a
 
 ## Schema de Output
 
-El technical.yaml generado debe cumplir estrictamente este schema:
+El technical.yaml generado debe cumplir estrictamente este schema. Usar `read_file` para leer el archivo:
 
-context/sdd-specs/technical.schema.yaml
+`context/sdd-specs/technical.schema.yaml`
 
 ## Ejemplo de Referencia
 
-Usa este ejemplo como referencia de formato y nivel de detalle esperado:
+Usa este ejemplo como referencia de formato y nivel de detalle esperado. Usar `read_file` para leer el archivo:
 
-context/sdd-specs/technical.example.yaml
+`context/sdd-specs/technical.example.yaml`
 
 ## Interaccion con el Usuario
 
@@ -716,4 +716,3 @@ context/sdd-specs/technical.example.yaml
 **Si se proporciona repositorio local**: Explorar la estructura en profundidad para reflejar patrones existentes, identificar archivos a modificar y enriquecer la calidad de los archivos de salida.
 
 **Si recibe un technical.yaml**: Ejecutar Flujo B completo — validar el schema (Fase B1), solicitar sub-agentes al usuario (Fase B2), generar tareas de implementacion (Fase B3) y resolver dependencias con orden de ejecucion (Fase B4).
-de implementacion (Fase B3) y resolver dependencias con orden de ejecucion (Fase B4).

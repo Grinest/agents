@@ -33,20 +33,24 @@ else
     echo "⚠️ No se encontró la carpeta $SRC_DIR/.gemini/agents/"
 fi
 
-# 4. Copiar Archivos de Soporte (Schemas, Ejemplos) - NO se copian .md aquí para evitar
-#    que Gemini los interprete como agentes
-echo "📑 Sincronizando archivos de soporte (schemas, ejemplos)..."
-for pattern in "schema-*.yaml" "example-*.yaml"; do
-    # shellcheck disable=SC2086
-    files=$(ls "$SRC_DIR"/$pattern 2>/dev/null || true)
-    if [ -n "$files" ]; then
-        for file in "$SRC_DIR"/$pattern; do
-            if [ -f "$file" ]; then
-                cp "$file" "$AGENTS_DIR/"
-            fi
-        done
-    fi
-done
+# 4. Copiar Archivos de Soporte (Schemas, Ejemplos) desde context/sdd-specs/
+SPECS_DIR="$REPO_ROOT/context/sdd-specs"
+echo "📑 Sincronizando archivos de soporte (schemas, ejemplos) desde $SPECS_DIR..."
+if [ -d "$SPECS_DIR" ]; then
+    for pattern in "*.schema.yaml" "*.example.yaml"; do
+        # shellcheck disable=SC2086
+        files=$(ls "$SPECS_DIR"/$pattern 2>/dev/null || true)
+        if [ -n "$files" ]; then
+            for file in "$SPECS_DIR"/$pattern; do
+                if [ -f "$file" ]; then
+                    cp "$file" "$AGENTS_DIR/"
+                fi
+            done
+        fi
+    done
+else
+    echo "⚠️ No se encontró la carpeta $SPECS_DIR"
+fi
 
 # 5. Configurar Instrucciones Globales (GEMINI.md)
 if [ -f "$SRC_DIR/GEMINI.md" ]; then
