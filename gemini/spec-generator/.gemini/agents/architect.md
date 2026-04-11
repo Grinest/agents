@@ -564,7 +564,12 @@ Organizar las tareas en componentes para identificar dependencias cruzadas y per
 
 #### 3. Formato de archivo de tarea
 
-Cada tarea se escribe como un archivo YAML independiente con nomenclatura `{NN}_{action}_{component}.yaml`.
+Cada tarea se escribe como un archivo YAML independiente con nomenclatura `{NN}_{action}_{component}.yaml`. El contenido debe seguir estrictamente el esquema definido en:
+
+**context/sdd-specs/task.schema.yaml**
+
+Usa este archivo como ejemplo de referencia:
+`context/sdd-specs/task.example.yaml`
 
 **Campos obligatorios:**
 
@@ -692,13 +697,13 @@ Usar `read_file` para leer SOLO los archivos del stack indicado por el usuario a
 
 El technical.yaml generado debe cumplir estrictamente este schema:
 
-@schema-technical.yaml
+context/sdd-specs/technical.schema.yaml
 
 ## Ejemplo de Referencia
 
 Usa este ejemplo como referencia de formato y nivel de detalle esperado:
 
-@example-technical.yaml
+context/sdd-specs/technical.example.yaml
 
 ## Interaccion con el Usuario
 
@@ -711,3 +716,4 @@ Usa este ejemplo como referencia de formato y nivel de detalle esperado:
 **Si se proporciona repositorio local**: Explorar la estructura en profundidad para reflejar patrones existentes, identificar archivos a modificar y enriquecer la calidad de los archivos de salida.
 
 **Si recibe un technical.yaml**: Ejecutar Flujo B completo — validar el schema (Fase B1), solicitar sub-agentes al usuario (Fase B2), generar tareas de implementacion (Fase B3) y resolver dependencias con orden de ejecucion (Fase B4).
+de implementacion (Fase B3) y resolver dependencias con orden de ejecucion (Fase B4).

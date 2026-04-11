@@ -192,7 +192,10 @@ tests_scope:
 - **outputs**: Datos que el sistema devuelve como resultado. Cada output debe especificar nombre, tipo de dato y descripcion. Incluir respuestas exitosas y respuestas de error con sus codigos
 - **tests_scope**: Escenarios de prueba que cubren el alcance funcional. Cada escenario tiene nombre clave y descripcion breve con resultado esperado. Debe incluir al menos: un caso exitoso, un error de validacion y un caso limite. Sirve como guia para que ingenieria defina los tests tecnicos detallados
 
-**Ruta de salida**: Escribir el archivo usando la herramienta **Write** en `docs/features/[feature_name]/feature.yaml`
+**Ruta de salida**: Escribir el archivo usando la herramienta **Write** en `docs/features/[feature_name]/feature.yaml`. El archivo generado debe cumplir con el esquema definido en `context/sdd-specs/feature.schema.yaml`.
+
+Usa este archivo como ejemplo de referencia de formato y nivel de detalle:
+`context/sdd-specs/feature.example.yaml`
 
 ## Ejemplo de Interaccion
 

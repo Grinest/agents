@@ -146,13 +146,13 @@ Usar `read_file` para leer SOLO el archivo de arquitectura del stack indicado po
 
 El feature.yaml generado debe cumplir estrictamente este schema:
 
-@schema-feature.yaml
+context/sdd-specs/feature.schema.yaml
 
 ## Ejemplo de Referencia
 
 Usa este ejemplo como referencia de formato y nivel de detalle esperado:
 
-@example-feature.yaml
+context/sdd-specs/feature.example.yaml
 
 ## Interaccion con el Usuario
 
