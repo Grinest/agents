@@ -32,7 +32,7 @@ jobs:
       - name: Checkout agents marketplace
         uses: actions/checkout@v4
         with:
-          repository: Grinest/agents
+          repository: bastion-core/agents
           ssh-key: ${{ secrets.AGENTS_GITHUB_TOKEN }}
           path: .agents-marketplace
           sparse-checkout: |

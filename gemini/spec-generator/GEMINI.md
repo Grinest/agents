@@ -2,30 +2,32 @@
 
 Este workspace genera especificaciones estandarizadas en formato **Specification-Driven Development (SDD)** usando subagents especializados. Es parte de la estrategia multi-modelo: **Gemini para Discovery, Claude Code para Delivery**.
 
+> **Nota sobre invocacion**: Los subagents se invocan escribiendo el simbolo arroba seguido del nombre del agente al inicio del prompt (ej: arroba + product, arroba + architect).
+
 ## Flujo Recomendado
 
 ### Flujo A: Nueva funcionalidad
 
 Sigue estos pasos secuencialmente para generar specs de una funcionalidad nueva:
 
-#### Paso 1: Generar feature.yaml con @product
+#### Paso 1: Generar feature.yaml con el agente **product**
 
-Invoca `@product` con la descripcion de la funcionalidad, stack, criterios de aceptacion, reglas de negocio y ruta destino.
+Invoca al agente **product** con la descripcion de la funcionalidad, stack, criterios de aceptacion, reglas de negocio y ruta destino.
 
 ```
-@product Necesito una spec para [descripcion de funcionalidad].
+Necesito una spec para [descripcion de funcionalidad].
 Stack: [python_fastapi | nextjs | flutter | multi_stack]
 Criterios: [criterios de aceptacion]
 Reglas: [reglas de negocio con valores concretos]
 Guardar en: docs/features/{feature_name}/feature.yaml
 ```
 
-#### Paso 2: Generar technical.yaml con @architect
+#### Paso 2: Generar technical.yaml con el agente **architect**
 
-Invoca `@architect` con la ruta al feature.yaml generado, el stack, repositorio de referencia y ruta destino.
+Invoca al agente **architect** con la ruta al feature.yaml generado, el stack, repositorio de referencia y ruta destino.
 
 ```
-@architect Genera el technical.yaml a partir de:
+Genera el technical.yaml a partir de:
 docs/features/{feature_name}/feature.yaml
 Stack: [python_fastapi | nextjs | flutter]
 Repositorio de referencia: [path al repo local]
@@ -44,24 +46,24 @@ cd /path/to/project-repo && claude
 
 Sigue estos pasos para generar specs de un cambio incremental a una feature existente:
 
-#### Paso 1: Generar change.yaml con @product
+#### Paso 1: Generar change.yaml con el agente **product**
 
-Invoca `@product` indicando que es un cambio a una feature existente. El agente leera el feature.yaml padre y generara el change.yaml.
+Invoca al agente **product** indicando que es un cambio a una feature existente. El agente leera el feature.yaml padre y generara el change.yaml.
 
 ```
-@product Necesito un cambio para la feature [feature_name]: [descripcion del cambio].
+Necesito un cambio para la feature [feature_name]: [descripcion del cambio].
 Feature existente: docs/features/{feature_name}/feature.yaml
 Repositorios afectados: [lista de repos]
 Prioridad: [low | medium | high | critical]
 Guardar en: docs/features/{feature_name}/changes/{change_id}/change.yaml
 ```
 
-#### Paso 2: Generar technical.yaml del cambio con @architect
+#### Paso 2: Generar technical.yaml del cambio con el agente **architect**
 
-Invoca `@architect` con la ruta al change.yaml generado. El agente leera el contexto padre (feature.yaml + technical.yaml) automaticamente.
+Invoca al agente **architect** con la ruta al change.yaml generado. El agente leera el contexto padre (feature.yaml + technical.yaml) automaticamente.
 
 ```
-@architect Genera el technical.yaml a partir de:
+Genera el technical.yaml a partir de:
 docs/features/{feature_name}/changes/{change_id}/change.yaml
 Stack: [python_fastapi | nextjs | flutter]
 Repositorio de referencia: [path al repo local]
@@ -82,27 +84,27 @@ cd /path/to/project-repo && claude
 
 | Subagent | Invocacion | Funcion |
 |----------|-----------|---------|
-| @product | `@product [descripcion]` | Genera feature.yaml (spec de producto) o change.yaml (cambio incremental) |
-| @architect | `@architect [instrucciones]` | Genera technical.yaml (spec tecnica) a partir de feature.yaml o change.yaml |
+| **product** | arroba + product [descripcion] | Genera feature.yaml (spec de producto) o change.yaml (cambio incremental) |
+| **architect** | arroba + architect [instrucciones] | Genera technical.yaml (spec tecnica) a partir de feature.yaml o change.yaml |
 
 ### Desarrollo y Review por Stack
 
 | Subagent | Stack | Funcion |
 |----------|-------|---------|
-| @backend-py | Python/FastAPI | Desarrollo backend con Hexagonal Architecture |
-| @qa-backend-py | Python/FastAPI | Testing y QA para backend Python |
-| @frontend-nextjs | Next.js | Desarrollo frontend con Two-layer Architecture |
-| @reviewer-frontend-nextjs | Next.js | Code review de PRs Next.js |
-| @mobile-flutter | Flutter | Desarrollo mobile con Clean Architecture |
+| **backend-py** | Python/FastAPI | Desarrollo backend con Hexagonal Architecture |
+| **qa-backend-py** | Python/FastAPI | Testing y QA para backend Python |
+| **frontend-nextjs** | Next.js | Desarrollo frontend con Two-layer Architecture |
+| **reviewer-frontend-nextjs** | Next.js | Code review de PRs Next.js |
+| **mobile-flutter** | Flutter | Desarrollo mobile con Clean Architecture |
 
 ## Instrucciones de Orquestacion
 
 Despues de que un subagent complete su tarea, sugiere al usuario el siguiente paso:
 
-- Despues de `@product` (feature.yaml) → Sugerir: "feature.yaml guardado. Para generar la spec tecnica, usa: `@architect`"
-- Despues de `@product` (change.yaml) → Sugerir: "change.yaml guardado y feature.yaml padre actualizado. Para generar la spec tecnica del cambio, usa: `@architect` con la ruta al change.yaml"
-- Despues de `@architect` (feature) → Sugerir: "technical.yaml guardado. Para iniciar desarrollo, abre Claude Code en tu proyecto: `cd /path/to/repo && claude`"
-- Despues de `@architect` (change) → Sugerir: "technical.yaml del cambio guardado y technical.yaml padre actualizado. Para iniciar desarrollo, abre Claude Code en tu proyecto: `cd /path/to/repo && claude`"
+- Despues del agente **product** (feature.yaml) → Sugerir: "feature.yaml guardado. Para generar la spec tecnica, invoca al agente **architect**"
+- Despues del agente **product** (change.yaml) → Sugerir: "change.yaml guardado y feature.yaml padre actualizado. Para generar la spec tecnica del cambio, invoca al agente **architect** con la ruta al change.yaml"
+- Despues del agente **architect** (feature) → Sugerir: "technical.yaml guardado. Para iniciar desarrollo, abre Claude Code en tu proyecto: `cd /path/to/repo && claude`"
+- Despues del agente **architect** (change) → Sugerir: "technical.yaml del cambio guardado y technical.yaml padre actualizado. Para iniciar desarrollo, abre Claude Code en tu proyecto: `cd /path/to/repo && claude`"
 
 ## Reglas Compartidas
 

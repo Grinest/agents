@@ -1,6 +1,6 @@
 # Schema: change.yaml
 # Definicion formal de cada campo del archivo change.yaml (especificacion de cambio incremental SDD).
-# Este archivo describe el formato esperado para que el subagent @product genere specs de cambio validas.
+# Este archivo describe el formato esperado para que el subagent product genere specs de cambio validas.
 # Un change.yaml representa un cambio incremental a una funcionalidad existente (feature.yaml).
 # Todos los campos son OBLIGATORIOS salvo que se indique lo contrario.
 
