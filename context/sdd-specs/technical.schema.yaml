@@ -1,6 +1,6 @@
 # Schema: technical.yaml
 # Definicion formal de cada campo del archivo technical.yaml (especificacion tecnica SDD).
-# Este archivo describe el formato esperado para que el subagent @architect genere specs validas.
+# Este archivo describe el formato esperado para que el subagent architect genere specs validas.
 # Los campos se clasifican como OBLIGATORIOS o CONDICIONALES segun el tipo de funcionalidad.
 
 schema:

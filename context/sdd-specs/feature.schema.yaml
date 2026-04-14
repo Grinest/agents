@@ -1,6 +1,6 @@
 # Schema: feature.yaml
 # Definicion formal de cada campo del archivo feature.yaml (especificacion de producto SDD).
-# Este archivo describe el formato esperado para que el subagent @product genere specs validas.
+# Este archivo describe el formato esperado para que el subagent product genere specs validas.
 # Todos los campos son OBLIGATORIOS salvo que se indique lo contrario.
 
 schema:

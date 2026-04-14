@@ -1,6 +1,6 @@
 # Schema: task.yaml
 # Definicion formal de cada campo del archivo de tarea (task.yaml) en la metodologia SDD.
-# Este archivo describe el formato esperado para que el subagent @architect genere tareas validas
+# Este archivo describe el formato esperado para que el subagent architect genere tareas validas
 # y para que los sub-agentes de desarrollo las ejecuten sin ambiguedad.
 
 schema:

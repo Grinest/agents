@@ -155,7 +155,7 @@ Si el usuario indica una ruta a un repositorio local, ejecutar exploracion profu
    - Interactors/Use Cases: buscar "class.*Interactor", "class.*UseCase"
    - Repositories: buscar "class.*Repository", "ABC", "abstract"
    - Services: buscar "class.*Service"
-   - Routers/Controllers: buscar "APIRouter", "@router", "@controller"
+   - Routers/Controllers: buscar "APIRouter", "router", "controller"
    - Modelos/Entidades: buscar "class.*Model", "Base.metadata", "Table("
    - Schemas/DTOs: buscar "class.*Schema", "BaseModel", "Freezed"
 4. **Archivos existentes relevantes**: Identificar archivos que la nueva funcionalidad debera modificar o con los que debera integrarse
