@@ -303,12 +303,15 @@ Organizar las tareas en componentes para identificar dependencias cruzadas y per
 
 #### 3. Formato de archivo de tarea
 
-Cada tarea se escribe como un archivo YAML independiente con nomenclatura `{NN}_{action}_{component}.yaml`. El contenido debe seguir estrictamente el esquema definido en:
+Cada tarea se escribe como un archivo YAML independiente con nomenclatura `{NN}_{action}_{component}.yaml`. El contenido debe seguir **ESTRICTAMENTE** el esquema definido en `context/sdd-specs/task.schema.yaml`.
 
-**context/sdd-specs/task.schema.yaml**
-
-Usa este archivo como ejemplo de referencia:
-`context/sdd-specs/task.example.yaml`
+**REGLA CRITICA DE CAMPOS**:
+- **NUNCA** usar `files_created` → usar `files_to_create`
+- **NUNCA** usar `files_modified` → usar `files_to_modify`
+- **NUNCA** usar `acceptance_criteria` → usar `acceptance`
+- **NUNCA** usar `description` → usar `scope`
+- **NUNCA** usar `priority` → usar `level`
+- **PROHIBIDO** incluir campos que no estan en el schema de tarea como: `feature`, `change`, `title`, `assigned_to`, `repo`, `path`, `implementation_steps`.
 
 **Campos obligatorios:**
 
@@ -318,19 +321,18 @@ Usa este archivo como ejemplo de referencia:
 | `level` | Complejidad: L1, L2, L3, L4 o L5 |
 | `parent` | Referencia al technical.yaml padre |
 | `status` | Siempre `PENDING` al crearse |
-| `scope` | Descripcion detallada del alcance de la tarea |
-| `files_to_create` | Lista de archivos que esta tarea debe crear |
-| `patterns` | Patrones y convenciones a seguir |
-| `acceptance` | Criterios de aceptacion verificables |
+| `scope` | Descripcion detallada del alcance de la tarea (reemplaza a 'description') |
+| `acceptance` | Criterios de aceptacion verificables (reemplaza a 'acceptance_criteria') |
 | `context_files` | Archivos de referencia necesarios |
 
-**Campos opcionales:**
+**Campos opcionales comunes:**
 
 | Campo | Descripcion |
 |-------|-------------|
+| `files_to_create` | Lista de archivos que esta tarea debe crear |
 | `files_to_modify` | Lista de archivos existentes que esta tarea modifica |
-| `phase` | Fase del desarrollo (ej. "1 - Foundation", "2 - Core Logic") |
-| `depends_on` | Lista de task IDs que deben completarse antes |
+| `patterns` | Patrones y convenciones a seguir |
+| `depends_on` | Lista de task IDs (campo task) que deben completarse antes |
 | `assigned_subagent` | Sub-agente responsable de ejecutar la tarea |
 
 #### 4. Criterios de nivel (level)
@@ -349,7 +351,7 @@ Crear las tareas en el directorio `{directorio_raiz_del_technical.yaml}/tasks/` 
 
 **Nota**: Si el `technical.yaml` se encuentra en `changes/{change_id}/`, las tareas van en `changes/{change_id}/tasks/`.
 
-#### 6. Ejemplo de tarea generada
+#### 6. Ejemplo de tarea generada (CORRECTO)
 
 ```yaml
 # tasks/01_create_endpoint.yaml
@@ -357,7 +359,7 @@ task: create_trip_endpoint
 level: L3
 parent: technical.yaml
 status: PENDING
-assigned_subagent: python-development:backend-py
+assigned_subagent: "python-development:backend-py"
 
 scope: |
   Implementar POST /api/v1/trips en FastAPI.
@@ -372,16 +374,14 @@ files_to_create:
 patterns:
   - router: usar APIRouter con prefix /trips
   - schemas: Pydantic v2 con validadores custom
-  - error_handling: HTTPException con detail descriptivo
 
 acceptance:
-  - endpoint devuelve 201 con trip_id
-  - validacion de coordenadas antes del use case
-  - tests unitarios cubren happy path + 3 error cases
+  - El endpoint devuelve 201 con trip_id al recibir datos validos
+  - Se valida el formato de coordenadas antes de llamar al use case
+  - Los tests unitarios pasan con 100% de cobertura en el router
 
 context_files:
-  - /docs/architecture.md
-  - /docs/coding_guidelines.md
+  - docs/architecture.md
   - technical.yaml
 ```
 

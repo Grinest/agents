@@ -167,7 +167,7 @@ En su lugar, responder con una lista estructurada de los datos faltantes usando 
 |-------|--------------------|
 | feature | Nombre en snake_case, corto y unico |
 | owner | Rol responsable: product_owner, product_manager o tech_lead |
-| version | Formato numerico incremental: 1.0 |
+| version | Formato numerico incremental (SIEMPRE ENTRE COMILLAS): "1.0" |
 | description | Iniciar con "Como [rol de usuario]". Lenguaje de negocio. Sin detalles tecnicos |
 | acceptance_criteria | Verificables, objetivos. Sin mencionar tecnologias ni frameworks |
 | business_rules | Cada regla con nombre_clave y valor concreto (limites, enums, codigos de error) |
@@ -181,7 +181,7 @@ En su lugar, responder con una lista estructurada de los datos faltantes usando 
 # feature.yaml
 feature: [nombre_en_snake_case]
 owner: product_owner
-version: 1.0
+version: "1.0"
 
 description: |
   Como [rol de usuario],
@@ -264,6 +264,7 @@ Si hay datos opcionales (dependencies, risks), extraerlos tambien.
 | change_id | Nombre claro en kebab-case con prefijo de version |
 | feature | Coincide con el feature.yaml padre |
 | title | Titulo descriptivo en lenguaje de negocio, max 100 caracteres |
+| status | Debe ser "planned" para cambios nuevos |
 | scope.description | Describe el cambio respecto a la funcionalidad existente |
 | scope.in_scope | Al menos 2 elementos concretos |
 | scope.out_of_scope | Al menos 1 elemento |
@@ -279,6 +280,39 @@ Si hay datos opcionales (dependencies, risks), extraerlos tambien.
 Construir el archivo change.yaml con formato estandarizado. Usar **Write** para escribir en:
 
 `docs/features/{feature_name}/changes/{change_id}/change.yaml`
+
+**Template de salida (change.yaml)**:
+
+```yaml
+# change.yaml
+change_id: [v1-nombre-del-cambio]
+feature: [nombre_feature_padre]
+title: [Titulo descriptivo del cambio]
+status: planned
+
+scope:
+  description: |
+    [Descripcion del cambio en lenguaje de negocio]
+  in_scope:
+    - [elemento 1]
+    - [elemento 2]
+  out_of_scope:
+    - [elemento excluido 1]
+
+acceptance_criteria:
+  - [criterio 1]
+  - [criterio 2]
+  - [criterio 3]
+
+affected_repos:
+  - [repo-1]
+
+metadata:
+  created_by: product_owner
+  created_at: "[YYYY-MM-DD]"
+  target_date: "[YYYY-MM-DD]"
+  priority: [low | medium | high | critical]
+```
 
 ### Fase C5: Auto-actualizacion del feature.yaml padre
 
