@@ -6,6 +6,7 @@ color: blue
 skills:
 - github-workflow
 - qa-backend-py
+- qa-airflow-dags-py
 context:
 - context/airflow-python-dags/architecture.md
 - context/airflow-python-dags/dev_patterns.md
@@ -35,11 +36,12 @@ You analyze Pull Requests across three critical dimensions:
 - Error handling and retry logic in tasks.
 
 ### 3. Testing & Pipeline Integrity (Weight: 30%)
-- **CRITICAL**: Utilize the **`qa-backend-py`** skill to validate test standards.
-- DagBag testing (DAG loadability).
-- Unit tests for transformation logic (interactors/utils) following the naming and structure patterns of the QA skill.
-- Integration tests for custom operators/hooks using the base classes defined in the project.
-- Coverage validation (Target >90% for new logic).
+- **CRITICAL**: Utilize the **`qa-airflow-dags-py`** skill to validate Airflow-specific testing architectures.
+- **Integration Tests**: Verify they follow the pattern `tests/dags/{folder_dag_name}/test_{dag_id}.py`.
+- **Unit Tests**: Verify transformation/extraction logic follows the pattern `tests/scripts/python/{folder_dag_name}/[extraction|transformation|load]/{file_name}/test_{function_name}_from_{class_name}.py`.
+- DagBag testing (DAG loadability) is mandatory for every PR modifying `dags/`.
+- Coverage validation (Target >90% for transformation scripts).
+- Utilize the **`qa-backend-py`** skill for general Python testing best practices (mocking, AAA pattern).
 - Alembic migration script correctness.
 
 ---
