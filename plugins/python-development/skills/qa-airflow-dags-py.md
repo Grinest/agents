@@ -1,58 +1,67 @@
 ---
 name: qa-airflow-dags-py
-description: Estándares de testing para DAGs de Airflow, incluyendo arquitectura de tests de integración y unitarios.
+description: Estándares de testing para DAGs de Airflow, incluyendo arquitectura de tests de integración, unitarios por capas y patrón AAA.
 model: sonnet
 color: blue
 ---
 # QA Airflow DAGs Skill
 
-Estándares y procedimientos para asegurar la calidad en proyectos de Apache Airflow con Python, enfocados en la integridad de los DAGs y la validación de la lógica de transformación de datos.
+Estándares y procedimientos para asegurar la calidad en proyectos de Apache Airflow con Python. Este skill define una arquitectura de pruebas rigurosa que debe seguirse incluso si el repositorio actual presenta desviaciones.
 
 ## Tecnologías de Testing
 
-- **Apache Airflow**: Para el contexto de ejecución y DagBag testing.
+- **Apache Airflow**: Para DagBag testing e integridad de orquestación.
 - **pytest**: Framework principal de pruebas.
-- **unittest.mock**: Para el aislamiento de tareas y servicios externos.
-- **pytest-mock**: Wrapper de pytest para mocking simplificado.
+- **unittest.mock / pytest-mock**: Para el aislamiento de tareas y servicios externos.
 
-## Arquitectura de Pruebas
-
-El repositorio de Airflow sigue una estructura de testing dividida entre integridad del flujo (integración) y lógica de negocio (unitaria).
+## Arquitectura de Pruebas Obligatoria
 
 ### 1. Pruebas de Integración (Integridad de DAGs)
-
-Validan que el DAG se cargue correctamente, no tenga ciclos y cumpla con los requerimientos de la plataforma (tags, owners, etc.).
+Validan que el DAG sea parseable, no tenga ciclos y cumpla con los metadatos requeridos (tags, owner, catchup).
 
 - **Ubicación**: `tests/dags/{folder_dag_name}/test_{dag_id}.py`
-- **Enfoque**: DagBag testing y validación de estructura.
+- **Patrón**: Utilizar `DagBag` para verificar `import_errors`.
 
-### 2. Pruebas Unitarias (Lógica de Tareas)
+### 2. Pruebas Unitarias (Lógica por Capas)
+Toda la lógica de procesamiento debe estar desacoplada del DAG y probada unitariamente. Los tests deben organizarse obligatoriamente siguiendo la estructura de capas del pipeline.
 
-Validan la lógica de transformación, extracción o carga contenida en scripts auxiliares o dentro de las tareas del DAG.
+- **Ubicación**: `tests/scripts/python/{folder_dag_name}/{layer}/{file_name}/test_{function_name}_from_{class_name}.py`
+- **Capas Definidas**:
+  * `extraction`: Lógica de obtención de datos y adaptadores.
+  * `transformation`: Lógica de limpieza, agregación y cálculo de métricas.
+  * `load`: Lógica de persistencia y carga en destino.
+  * `orchestration`: Lógica de soporte a la ejecución (runtime, sensores).
+  * `common`: Utilidades compartidas y manejo de excepciones.
 
-- **Ubicación**: `tests/scripts/python/{folder_dag_name}/[extraction | transformation | load]/{file_name}/test_{function_name}_from_{class_name}.py`
-- **Reglas de Nomenclatura**:
-  - Directorio: Espejo de la ubicación del script en `dags/` o `scripts/`.
-  - Archivo: `test_{function_name}_from_{class_name}.py`.
-  - Clase: `Test{FunctionName}From{ClassName}`.
-  - Función: `test_should_{expected_behavior}_when_{condition}`.
+## Patrón de Diseño: AAA (Arrange-Act-Assert)
 
-## Patrones Recomendados
+Todos los tests deben seguir obligatoriamente la estructura **AAA** para garantizar legibilidad y mantenibilidad:
 
-### DagBag Testing (Integración)
+1.  **Arrange (Organizar)**: Configurar el entorno, instanciar objetos y preparar Mocks.
+2.  **Act (Actuar)**: Ejecutar la función o método que se está probando.
+3.  **Assert (Afirmar)**: Verificar que el resultado obtenido es el esperado y que las interacciones con los mocks fueron correctas.
+
+### Ejemplo con Patrón AAA:
 ```python
-from airflow.models import DagBag
+def test_should_calculate_sum_when_valid_input(self):
+    # Arrange
+    data = [10, 20, 30]
+    expected_result = 60
+    calculator = MetricsCalculator()
 
-def test_dag_loads_with_no_errors():
-    dag_bag = DagBag(dag_folder="dags/", include_examples=False)
-    assert not dag_bag.import_errors
+    # Act
+    result = calculator.sum_values(data)
+
+    # Assert
+    assert result == expected_result
 ```
 
-### Unit Testing con Mocks
-- Aislar las tareas de las conexiones reales a la base de datos o APIs externas.
-- Validar que los parámetros pasados a los operadores/hooks sean los correctos.
-- Probar el manejo de excepciones y reintentos.
+## Reglas de Nomenclatura
+- **Archivo**: `test_{function_name}_from_{class_name}.py`
+- **Clase**: `Test{FunctionName}From{ClassName}`
+- **Función**: `test_should_{expected_behavior}_when_{condition}`
 
-## Requerimientos de Cobertura
+## Requerimientos de Calidad
+- **Aislamiento**: No se permiten conexiones reales a BD o APIs en tests unitarios.
+- **Cobertura**: >90% en capas de `transformation` y `extraction`.
 - **Integridad**: 100% de los DAGs deben pasar el test de carga.
-- **Lógica Crítica**: >90% de cobertura en scripts de transformación y extracción.
