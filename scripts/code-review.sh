@@ -34,7 +34,7 @@ set -euo pipefail
 # Default configuration
 # =============================================================================
 AGENT_FILE=""
-MODEL="claude-sonnet-4-20250514"
+MODEL="claude-sonnet-4-6"
 ARCH_THRESHOLD=7
 QUALITY_THRESHOLD=7
 TEST_THRESHOLD=8

@@ -55,10 +55,10 @@ jobs:
           chmod +x .agents-marketplace/scripts/code-review.sh
           .agents-marketplace/scripts/code-review.sh \
             --agent .agents-marketplace/plugins/flutter-development/agents/reviewer-flutter-app.md \
-            --model claude-opus-4-20250514 \
-            --arch-threshold 8 \
-            --quality-threshold 7 \
-            --test-threshold 7 \
+            --model claude-sonnet-4-6 \
+            --arch-threshold 9 \
+            --quality-threshold 9 \
+            --test-threshold 9 \
             --file-pattern '\.dart$' \
             --scope-label 'Flutter/Dart' \
             --max-files 50
