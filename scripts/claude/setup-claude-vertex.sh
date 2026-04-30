@@ -235,24 +235,21 @@ validate_prerequisites() {
 }
 
 # =============================================================================
-# Step 1 — Show current Claude status
+# Step 1 — Show current Claude status (informational only)
 # =============================================================================
 step_show_current_status() {
   log_step 1 "Checking current Claude Code authentication"
 
   if ! command -v claude &>/dev/null; then
-    log_warning "Skipping: 'claude' CLI is not installed."
+    log_warning "'claude' CLI is not installed. Skipping status check."
     return 0
   fi
 
-  log_info "Current 'claude' status (review the 'Auth' line):"
-  if [[ "${DRY_RUN}" == true ]]; then
-    log_dry_run "claude /status"
-    return 0
-  fi
-
-  # claude /status is interactive; print a hint if it cannot run non-interactively
-  claude /status 2>/dev/null || log_warning "Could not run 'claude /status' non-interactively. Run it manually inside a Claude session."
+  # 'claude /status' is interactive and would block this non-interactive script.
+  # Just instruct the user to run it manually before continuing.
+  log_info "Before continuing, you can verify your current auth in another terminal:"
+  echo -e "  ${COLOR_BOLD}claude${COLOR_RESET}   # then type ${COLOR_BOLD}/status${COLOR_RESET}"
+  log_info "(Skipping automatic check because '/status' requires an interactive session.)"
 }
 
 # =============================================================================
@@ -314,10 +311,52 @@ remove_config_block() {
 }
 
 # =============================================================================
+# Detect Vertex AI vars added manually outside the managed block
+# =============================================================================
+detect_unmanaged_vars() {
+  local managed_vars=(
+    "CLAUDE_CODE_USE_VERTEX"
+    "ANTHROPIC_VERTEX_PROJECT_ID"
+    "CLOUD_ML_REGION"
+    "ANTHROPIC_DEFAULT_OPUS_MODEL"
+    "ANTHROPIC_DEFAULT_SONNET_MODEL"
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL"
+  )
+
+  # Build content excluding the managed block
+  local outside_block
+  outside_block=$(awk -v start="${CONFIG_BLOCK_START}" -v end="${CONFIG_BLOCK_END}" '
+    $0 == start { skip = 1; next }
+    $0 == end   { skip = 0; next }
+    !skip       { print }
+  ' "${SHELL_RC}")
+
+  local found=()
+  local var
+  for var in "${managed_vars[@]}"; do
+    if echo "${outside_block}" | grep -qE "^[[:space:]]*export[[:space:]]+${var}="; then
+      found+=("${var}")
+    fi
+  done
+
+  if [[ ${#found[@]} -gt 0 ]]; then
+    log_warning "Detected Vertex AI variables already defined outside the managed block in ${SHELL_RC}:"
+    for var in "${found[@]}"; do
+      log_warning "  - ${var}"
+    done
+    log_warning "Remove those manual exports to avoid duplicate or conflicting values."
+  fi
+}
+
+# =============================================================================
 # Step 4 — Append environment variables to shell rc
 # =============================================================================
 step_write_env_vars() {
   log_step 3 "Writing environment variables to ${SHELL_RC}"
+
+  if [[ "${DRY_RUN}" == false && -f "${SHELL_RC}" ]]; then
+    detect_unmanaged_vars
+  fi
 
   remove_config_block
 
